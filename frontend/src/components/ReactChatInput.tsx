@@ -1,0 +1,557 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout } from '../lib/api';
+
+export default function ChatInput() {
+  const [message, setMessage] = useState('');
+  const [selectedModel, setSelectedModel] = useState('claude-sonnet-4.5');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [heuristicScore, setHeuristicScore] = useState<number | null>(null);
+  const [llmScore, setLlmScore] = useState<number | null>(null);
+  const [empiricalScore, setEmpiricalScore] = useState<number | null>(null);
+  const [averageScore, setAverageScore] = useState<number | null>(null);
+  const [isScoring, setIsScoring] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const [llmReasons, setLlmReasons] = useState<string[] | null>(null);
+  const [llmRaw, setLlmRaw] = useState<string | null>(null);
+  const [empiricalReasons, setEmpiricalReasons] = useState<string[] | null>(null);
+  const [suggestedPrompt, setSuggestedPrompt] = useState<string | null>(null);
+  const [suggestedText, setSuggestedText] = useState<string>('');
+  const [heuristicReasons, setHeuristicReasons] = useState<string[] | null>(null);
+  const [paywallOpen, setPaywallOpen] = useState(false)
+  const [remainingUses, setRemainingUses] = useState<number | null>(null)
+  const [paid, setPaid] = useState<boolean | null>(null)
+
+  // Typewriter display states
+  const [llmText, setLlmText] = useState<string>('');
+  const [empiricalText, setEmpiricalText] = useState<string>('');
+  const [heuristicText, setHeuristicText] = useState<string>('');
+  const typeIntervalsRef = useRef<{ llm?: number; empirical?: number; heuristic?: number; suggested?: number }>({});
+  // Track last successfully evaluated prompt to avoid duplicate costly runs
+  const lastEvaluatedPromptRef = useRef<string | null>(null);
+  // Maintain a single-line baseline height; only grow when wrapping
+  const baselineHeightRef = useRef<number>(40); // px; ~2.5rem with 16px root
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    // Ensure baseline height is measured once
+    if (!message.trim()) {
+      el.style.height = '2.5rem';
+      baselineHeightRef.current = Math.max(
+        baselineHeightRef.current,
+        Math.round(el.getBoundingClientRect().height)
+      );
+      return;
+    }
+    // For non-empty, grow only if needed beyond baseline
+    el.style.height = 'auto';
+    const target = Math.max(el.scrollHeight, baselineHeightRef.current);
+    el.style.height = `${target}px`;
+  }, [message]);
+
+  // Load initial device status so the send button can show remaining uses immediately
+  useEffect(() => {
+    (async () => {
+      try {
+        const status = await getDeviceStatus()
+        setRemainingUses(status.remaining_uses)
+        setPaid(status.paid)
+      } catch {}
+    })()
+  }, [])
+
+  // After Stripe success redirect, poll device status until paid, then unlock UI
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('checkout') === 'success') {
+      const sessionId = params.get('session_id')
+      // Try server-side confirm immediately (works even if webhook is delayed)
+      // Always try confirm; backend will fall back to last session via device cache
+      confirmCheckout(sessionId || '').catch(() => {})
+      let tries = 0
+      const iv = window.setInterval(async () => {
+        tries += 1
+        try {
+          const status = await getDeviceStatus()
+          setRemainingUses(status.remaining_uses)
+          if (status.paid) {
+            window.clearInterval(iv)
+            params.delete('checkout')
+            const qs = params.toString()
+            const newUrl = window.location.pathname + (qs ? `?${qs}` : '')
+            window.history.replaceState({}, '', newUrl)
+            // Show purchase success flash
+            showFlash('Purchase successful')
+            setPaid(true)
+            return
+          }
+        } catch {
+          // ignore transient errors
+        }
+        if (tries >= 60) {
+          window.clearInterval(iv)
+          // If still not paid after ~60s, show paywall again so user can retry
+          setPaywallOpen(true)
+        }
+      }, 1000)
+      return () => window.clearInterval(iv)
+    }
+  }, [])
+
+  // Reset scores if text is cleared
+  useEffect(() => {
+    if (!message.trim()) {
+      if (abortRef.current) {
+        abortRef.current.abort();
+        abortRef.current = null;
+      }
+      setHeuristicScore(null);
+      setLlmScore(null);
+      setEmpiricalScore(null);
+      setAverageScore(null);
+      setLlmReasons(null);
+      setLlmRaw(null);
+      setEmpiricalReasons(null);
+      setSuggestedPrompt(null);
+      setHeuristicReasons(null);
+      setLlmText('');
+      setEmpiricalText('');
+      setHeuristicText('');
+      // Clear any typewriter timers
+      if (typeIntervalsRef.current.llm) window.clearInterval(typeIntervalsRef.current.llm);
+      if (typeIntervalsRef.current.empirical) window.clearInterval(typeIntervalsRef.current.empirical);
+      if (typeIntervalsRef.current.heuristic) window.clearInterval(typeIntervalsRef.current.heuristic);
+      if (typeIntervalsRef.current.suggested) window.clearInterval(typeIntervalsRef.current.suggested);
+      typeIntervalsRef.current = {};
+      setSuggestedText('');
+    }
+  }, [message]);
+
+  async function handleSend() {
+    const trimmed = message.trim();
+    if (!trimmed || isScoring) return;
+    // Skip if same as the last evaluated prompt to prevent duplicate AI calls
+    if (lastEvaluatedPromptRef.current === trimmed) return;
+    // Skip network during tests
+    if (import.meta.env.MODE === 'test') return;
+    if (abortRef.current) abortRef.current.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+    try {
+      // Clear prior judge responses immediately for new prompt
+      if (typeIntervalsRef.current.llm) window.clearInterval(typeIntervalsRef.current.llm);
+      if (typeIntervalsRef.current.empirical) window.clearInterval(typeIntervalsRef.current.empirical);
+      if (typeIntervalsRef.current.heuristic) window.clearInterval(typeIntervalsRef.current.heuristic);
+      if (typeIntervalsRef.current.suggested) window.clearInterval(typeIntervalsRef.current.suggested);
+      typeIntervalsRef.current = {};
+      setLlmText('');
+      setEmpiricalText('');
+      setHeuristicText('');
+      setLlmReasons(null);
+      setEmpiricalReasons(null);
+      setHeuristicReasons(null);
+        setSuggestedPrompt(null);
+      setSuggestedText('');
+
+      setIsScoring(true);
+      let res: ScoreResponse
+      try {
+        res = await scorePrompt(trimmed, ac.signal);
+      } catch (err: any) {
+        if (err && err.status === 402) {
+          setIsScoring(false)
+          setPaywallOpen(true)
+          setPaid(false)
+          setRemainingUses(err.body?.remaining_uses ?? 0)
+          return
+        }
+        throw err
+      }
+      const h = res.heuristic?.score ?? null;
+      const l = res.llm?.score ?? null;
+      const e = res.empirical?.score ?? null;
+      setHeuristicScore(h);
+      setLlmScore(l);
+      setEmpiricalScore(e);
+      setHeuristicReasons(res.heuristic?.reasons ?? null);
+      setLlmReasons(res.llm?.reasons ?? null);
+      setLlmRaw(res.llm?.raw ?? null);
+      setEmpiricalReasons(res.empirical?.reasons ?? null);
+      setSuggestedPrompt(res.suggested_prompt ?? null);
+      const nums = [h, l, e].filter((v): v is number => typeof v === 'number');
+      setAverageScore(nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null);
+
+      // Refresh remaining uses after a successful scoring request
+      try {
+        const status = await getDeviceStatus()
+        setRemainingUses(status.remaining_uses)
+        setPaid(status.paid)
+      } catch {}
+
+      // Hide loader before typing so users can read progressively
+      setIsScoring(false);
+
+      // Sequentially render LLM → Empirical → Heuristic → Suggested Prompt
+      const llmR = joinReasons(res.llm?.reasons);
+      const empR = joinReasons(res.empirical?.reasons);
+      const heuR = joinReasons(res.heuristic?.reasons);
+      await typeText(llmR, setLlmText, 'llm');
+      await typeText(empR, setEmpiricalText, 'empirical');
+      await typeText(heuR, setHeuristicText, 'heuristic');
+      await typeText(res.suggested_prompt ?? '', setSuggestedText, 'suggested');
+      // Record the last prompt only after a successful end-to-end cycle
+      lastEvaluatedPromptRef.current = trimmed;
+    } catch (_e) {
+      // ignore for now
+    } finally {
+      setIsScoring(false);
+    }
+  }
+
+  function showFlash(text: string) {
+    const root = document.getElementById('flash-root')
+    if (!root) return
+    const el = document.createElement('div')
+    el.className = 'flash-success'
+    el.textContent = text
+    root.appendChild(el)
+    setTimeout(() => {
+      el.classList.add('flash-success--hide')
+      setTimeout(() => el.remove(), 300)
+    }, 2000)
+  }
+
+  async function sendSuggestedPrompt() {
+    if (!suggestedPrompt) return
+    try { await navigator.clipboard.writeText(suggestedPrompt) } catch {}
+    // Ensure we don't block on duplicate-guard; server also dedups/debounces
+    lastEvaluatedPromptRef.current = null
+    setMessage(suggestedPrompt)
+    // Defer to allow state to update textarea, then submit
+    setTimeout(() => { void handleSend() }, 0)
+  }
+
+  function sendToChatGPT() {
+    const promptToSend = suggestedPrompt || message
+    if (!promptToSend) return
+    try { navigator.clipboard.writeText(promptToSend) } catch {}
+    const url = `https://chat.openai.com/?q=${encodeURIComponent(promptToSend)}`
+    window.open(url, '_blank', 'noopener')
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void handleSend();
+    }
+  }
+
+  function joinReasons(reasons?: string[] | null) {
+    if (!reasons || reasons.length === 0) return '';
+    return reasons.join(' ');
+  }
+
+  async function typeText(
+    text: string,
+    setter: (v: string) => void,
+    key: 'llm' | 'empirical' | 'heuristic' | 'suggested'
+  ): Promise<void> {
+    // Clear only this section's previous interval
+    const prev = typeIntervalsRef.current[key];
+    if (prev) window.clearInterval(prev);
+    setter('');
+    if (!text) {
+      typeIntervalsRef.current[key] = undefined;
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      let i = 0;
+      const id = window.setInterval(() => {
+        i += 1;
+        setter(text.slice(0, i));
+        if (i >= text.length) {
+          window.clearInterval(id);
+          resolve();
+        }
+      }, 8);
+      typeIntervalsRef.current[key] = id;
+    });
+  }
+
+  return (
+    <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-start justify-center p-6">
+      <div className="w-full max-w-5xl relative flex gap-8">
+        {/* Flash area */}
+        <div id="flash-root" className="absolute -top-8 left-1/2 -translate-x-1/2"></div>
+        {/* Top-right upgrade now (hidden if paid) */}
+        {paid === false && (
+          <button
+            className="upgrade-now"
+            onClick={async () => {
+              try {
+                const { url } = await createCheckout()
+                window.location.href = url
+              } catch {}
+            }}
+          >
+            Upgrade Now
+          </button>
+        )}
+        {/* Left scoring panel (modal) */}
+        <aside className="w-56 bg-white rounded-2xl shadow-lg border border-slate-200 p-6 flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center">
+            <ScoreRing label="" value={averageScore} loading={isScoring} size={96} help={"The average of all judges. Helps you track general prompt quality at a glance. Higher is better."} />
+            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Overall Score</div>
+          </div>
+          <div className="flex flex-col items-center">
+            <ScoreRing label="" value={llmScore} loading={isScoring} size={64} help={"Evaluates clarity, completeness, feasibility, and ambiguity. Returns a 0–100 score with reasons."} />
+            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">LLM</div>
+          </div>
+          <div className="flex flex-col items-center">
+            <ScoreRing label="" value={empiricalScore} loading={isScoring} size={64} help={"Runs the prompt multiple times to assess format adherence, consistency, and substance."} />
+            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Empirical</div>
+          </div>
+        <div className="flex flex-col items-center">
+            <ScoreRing label="" value={heuristicScore} loading={isScoring} size={64} help={"Checks prompt length, specificity, and common anti-patterns (e.g., vagueness)."} />
+            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Heuristic</div>
+          </div>
+        </aside>
+
+        {/* Main card */}
+        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200">
+
+          {/* Input with inline send */}
+          <div className="p-4 flex items-start gap-6">
+            <div className="flex-1 relative">
+              <textarea
+                ref={textareaRef}
+                value={message}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="Type Anything..."
+                rows={1}
+                className="w-full resize-none overflow-hidden rounded-xl bg-slate-100/60 border border-slate-200 focus:outline-none text-slate-900 placeholder-slate-400 text-base leading-relaxed pr-12 pl-4 pt-2 pb-6"
+                style={{ minHeight: '36px' }}
+              />
+              <button
+                aria-label="Send"
+                onClick={() => void handleSend()}
+                disabled={!message.trim() || isScoring}
+                className={`send-btn ${paid === false && typeof remainingUses === 'number' && remainingUses > 0 ? 'send-btn--wide' : ''}`}
+              >
+                {paid === false && typeof remainingUses === 'number' && remainingUses > 0 ? (
+                  <span className="flex items-center gap-2">
+                    <span className="send-btn__label">Remaining uses: {remainingUses}</span>
+                    <span className="send-btn__icon">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4">
+                        <path d="M12 19V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                  </span>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4">
+                    <path d="M12 19V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Loader directly under input, left-aligned */}
+          {isScoring && (
+            <div className="px-4 pt-0">
+              <ThreeDotLoader />
+            </div>
+          )}
+
+          {/* Paywall modal */}
+          {paywallOpen && (
+            <div className="px-4 pb-4">
+              <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
+                <div className="text-sm text-slate-800 mb-2">You are out of requests for the free trial. Upgrade for unlimited.</div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={async () => {
+                      try {
+                        const { url } = await createCheckout()
+                        window.location.href = url
+                      } catch {}
+                    }}
+                    className="upgrade-btn"
+                  >
+                    Upgrade
+                  </button>
+                  <button onClick={() => setPaywallOpen(false)} className="text-xs text-slate-600 hover:underline">Not now</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* LLM Insights (typewriter) */}
+          {llmText && (
+            <div className="px-4 pb-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">LLM Insights</div>
+                <div className="text-slate-700 text-sm whitespace-pre-wrap">{llmText}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Empirical Insights (typewriter) */}
+          {empiricalText && (
+            <div className="px-4 pb-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Empirical Insights</div>
+                <div className="text-slate-700 text-sm whitespace-pre-wrap">{empiricalText}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Heuristic Insights (typewriter) */}
+          {heuristicText && (
+            <div className="px-4 pb-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Heuristic Insights</div>
+                <div className="text-slate-700 text-sm whitespace-pre-wrap">{heuristicText}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Suggested Prompt with Copy (animates after heuristic) */}
+          {suggestedText && (
+            <div className="px-4 pb-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
+                <div className="flex-1">
+                  <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Suggested Prompt</div>
+                  <div className="whitespace-pre-wrap break-words text-slate-700 text-sm">{suggestedText}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CopyButton text={suggestedPrompt ?? ''} />
+                  {suggestedPrompt && (
+                    <button className="send-suggested-btn" onClick={sendSuggestedPrompt}>
+                      Grade this prompt
+                    </button>
+                  )}
+                  {paid === true && (
+                    <button className="send-chatgpt-btn" onClick={sendToChatGPT}>
+                      Send to ChatGPT
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Footer hint */}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScoreRing({ label, value, loading, size = 56, color, help }: { 
+  label: string; 
+  value: number | null; 
+  loading: boolean; 
+  size?: number;
+  color?: 'red' | 'yellow' | 'green';
+  help?: string;
+}) {
+  const stroke = Math.round(size * 0.107);
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = value == null ? 0 : Math.max(0, Math.min(100, value));
+  const dash = circumference * (pct / 100);
+  
+  const getColor = () => {
+    if (value == null) return '#94a3b8';
+    const v = Math.max(0, Math.min(100, value));
+    // Map 0->red (#ef4444), 50->yellow (#eab308), 100->green (#22c55e)
+    // Interpolate in two segments: 0-50 (red->yellow), 50-100 (yellow->green)
+    const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t);
+    const hex = (r: number, g: number, b: number) => `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+    const red = { r: 239, g: 68, b: 68 };    // #ef4444
+    const yellow = { r: 234, g: 179, b: 8 };  // #eab308
+    const green = { r: 34, g: 197, b: 94 };   // #22c55e
+    if (v <= 50) {
+      const t = v / 50;
+      return hex(lerp(red.r, yellow.r, t), lerp(red.g, yellow.g, t), lerp(red.b, yellow.b, t));
+    } else {
+      const t = (v - 50) / 50;
+      return hex(lerp(yellow.r, green.r, t), lerp(yellow.g, green.g, t), lerp(yellow.b, green.b, t));
+    }
+  };
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="rotate-[-90deg]">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#e2e8f0"
+          strokeWidth={stroke}
+          fill="none"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={getColor()}
+          strokeWidth={stroke}
+          fill="none"
+          strokeDasharray={`${dash} ${circumference - dash}`}
+          strokeLinecap="round"
+          className="transition-[stroke-dasharray] duration-500 ease-out"
+        />
+      </svg>
+      <div className={`absolute inset-0 grid place-items-center font-bold text-slate-700 ${size > 60 ? 'text-lg' : 'text-sm'}`}>
+        {value == null ? (loading ? '…' : '—') : Math.round(value)}
+      </div>
+      <div className={`absolute -top-2 -right-2 rounded-full bg-white border border-slate-200 grid place-items-center text-slate-600 font-medium ${size > 60 ? 'h-6 w-6 text-xs' : 'h-5 w-5 text-[10px]'}`}>
+        {label}
+      </div>
+      {help && (
+        <div className="ring-help" aria-label="Help">
+          <div className="ring-help__icon">?</div>
+          <div className="ring-help__tooltip">{help}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = React.useState(false)
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+    } catch {}
+  }
+  return (
+    <button
+      aria-label={copied ? 'Copied' : 'Copy suggested prompt'}
+      onClick={copy}
+      className={`self-start inline-flex items-center h-8 px-3 rounded-md border text-xs transition-colors ${
+        copied ? 'bg-green-100 text-green-700 border-green-200' : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+      }`}
+    >
+      <span>Copy</span>
+      {copied && <span className="ml-1">✓</span>}
+    </button>
+  )
+}
+
+function ThreeDotLoader() {
+  const size = 4;
+  return (
+    <div className="flex items-center justify-start gap-1.5 py-2 ml-4">
+      <div className="bg-gray-400 rounded-full animate-bounce" style={{ width: size, height: size, animationDelay: '0ms', animationDuration: '600ms' }}></div>
+      <div className="bg-gray-400 rounded-full animate-bounce" style={{ width: size, height: size, animationDelay: '150ms', animationDuration: '600ms' }}></div>
+      <div className="bg-gray-400 rounded-full animate-bounce" style={{ width: size, height: size, animationDelay: '300ms', animationDuration: '600ms' }}></div>
+    </div>
+  );
+}

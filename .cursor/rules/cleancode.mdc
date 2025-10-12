@@ -1,0 +1,86 @@
+---
+alwaysApply: true
+---
+
+### 1. Use Descriptive Naming 
+Good names are crucial for readability. In Rails:
+
+Use descriptive method and variable names. For example, calculate_total is clearer than calc.
+Stick to Rails conventions: user_profile_path for URLs or user_profile for methods related to users.
+Naming conventions are a roadmap for anyone reading the code.
+
+### 2. Keep Methods Small and Focused 
+Avoid long methods that try to do too much. Break complex logic down into smaller methods that handle one responsibility. This helps:
+
+Increase readability.
+Simplify debugging.
+Allow for reusability.
+In Rails controllers, keep actions like create, show, and index simple. Complex logic should be offloaded to service objects or model methods.
+
+### 3. Avoid Hardcoding — Use Constants & ENV Variables 
+Hardcoding values can lead to maintenance headaches. Instead:
+
+Use environment variables for sensitive data, like API keys.
+Define constants for values that rarely change.
+For example, rather than embedding a URL directly in code, place it in Global Config, there are many examples of this. This approach keeps things secure and adaptable.
+
+### 4. Keep Your Controllers Slim 
+Controllers are the middlemen between models and views; they shouldn’t be loaded with business logic. Use:
+
+Service objects for complicated workflows or heavy logic.
+Concerns to share code between controllers.
+Before_actions sparingly for authentication and repetitive tasks.
+By keeping your controllers lean, they’re easier to read and maintain.
+
+### 5. Use Scopes in Models 
+Rails models can get unwieldy if they handle too many responsibilities. Scopes help filter data cleanly. For instance, instead of repeatedly querying where(status: "active"), define a scope:
+
+scope :active, -> { where(status: 'active') }
+This makes your code more readable and removes duplication.
+
+### 6. Follow DRY (Don’t Repeat Yourself)
+Redundancy bloats your codebase. Rails provides ways to keep things DRY:
+
+Use partials in views for reusable components.
+Extract repeated logic into helper methods, concerns, or service objects.
+Embrace Rails built-ins like before_action to eliminate repetitive code.
+DRY code is not only efficient but easier to change when needed.
+
+### 7. Write Tests Alongside Your Code 
+Testing is crucial in Rails development, and clean code benefits from it:
+
+Write RSpec tests for models, controllers, and views.
+Use factories to simplify test setup.
+Embrace Test-Driven Development (TDD): it keeps your code concise and helps detect issues early.
+Tests are a safety net for maintaining clean code.
+
+### 8. Document Your Code Where Needed 
+While clean code should be self-explanatory, some parts may need additional context. In those cases:
+
+Use comments to clarify complex logic.
+Avoid excessive commenting — only add comments where necessary.
+Comments should add value, not clutter, there doesn't need to be comments above every method or line.
+
+### 9. Avoid N+1 Queries with Eager Loading 
+Performance is part of clean code. In Rails, avoid N+1 queries by using eager loading for associations:
+
+# Bad: This causes an N+1 query issue
+User.all.each do |user|
+  puts user.profile.name
+end
+# Good: Eager loading solves this
+User.includes(:profile).each do |user|
+  puts user.profile.name
+end
+Eager loading improves performance and keeps your database calls efficient.
+
+### 10. Leverage Rails’ Built-In Helpers 
+Rails is packed with built-in methods and helpers that simplify common tasks. Use these to keep your code concise and clean:
+
+Use link_to, button_to, etc., for links and buttons in views.
+Use number_to_currency for formatting currency.
+Use pluck instead of map for database fields to save on memory.
+Rails’ helpers are designed to keep your code elegant and concise.
+
+### Conclusion
+Clean code is the foundation of a maintainable, efficient Ruby on Rails application. By sticking to descriptive naming, avoiding duplication, keeping controllers slim, and using Rails’ built-in features, your code remains clear and adaptable. Investing in clean code principles not only improves your Rails app today but ensures that future developers will have an easier time maintaining and extending it.
