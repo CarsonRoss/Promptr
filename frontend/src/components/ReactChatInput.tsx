@@ -55,9 +55,44 @@ export default function ChatInput() {
         const status = await getDeviceStatus()
         setRemainingUses(status.remaining_uses)
         setPaid(status.paid)
+        // If paid, fetch subscription status immediately so banner reflects
+        // cancel-at-period-end state without waiting for the periodic refresher.
+        if (status.paid) {
+          try {
+            const sub = await getSubscriptionStatus()
+            setSubscriptionStatus(sub)
+          } catch {}
+        }
       } catch {}
     })()
   }, [])
+
+  // Keep subscription banner stable after cancellation by periodically refreshing status
+  useEffect(() => {
+    if (paid === true) {
+      let tries = 0
+      // Fetch immediately once so UI reflects latest state on first render
+      ;(async () => {
+        try {
+          const sub = await getSubscriptionStatus()
+          setSubscriptionStatus(sub)
+        } catch {}
+      })()
+      const iv = window.setInterval(async () => {
+        tries += 1
+        try {
+          const sub = await getSubscriptionStatus()
+          setSubscriptionStatus(sub)
+          if (sub.cancel_at_period_end || tries >= 15) {
+            window.clearInterval(iv)
+          }
+        } catch {
+          if (tries >= 15) window.clearInterval(iv)
+        }
+      }, 3000)
+      return () => window.clearInterval(iv)
+    }
+  }, [paid])
 
   // After Stripe success redirect, poll device status until paid, then unlock UI
   useEffect(() => {

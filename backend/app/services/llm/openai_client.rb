@@ -199,7 +199,7 @@ module Llm
         1) What the LLM judge is looking for (criteria to maximize LLM judge score).
         2) What the Empirical judge is looking for (criteria that lead to consistent, well‑formatted outputs such as JSON or lists as applicable. If the function doesn't need to return a response, this isn't needed).
 
-        Your task: Produce ONLY JSON with a single key "suggested_prompt" (string) that is an improved prompt which simultaneously satisfies the requirements of both judges above. The suggested prompt must be specific, feasible, unambiguous, and—when appropriate—explicitly request the desired output format (e.g., JSON keys or list length) to maximize Empirical consistency. No prose, no code fences, only JSON.
+        Your task: Produce an improved prompt which simultaneously satisfies the requirements of both judges above. The suggested prompt must be specific, feasible, unambiguous, and—when appropriate—explicitly request the desired output format (e.g., JSON keys or list length) to maximize Empirical consistency. No prose, no code fences.
       PROMPT
 
       payload = {
