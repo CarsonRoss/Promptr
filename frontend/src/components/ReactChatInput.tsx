@@ -420,24 +420,12 @@ export default function ChatInput() {
                 aria-label="Send"
                 onClick={() => void handleSend()}
                 disabled={!message.trim() || isScoring}
-                className={`send-btn ${paid === false && typeof remainingUses === 'number' && remainingUses > 0 ? 'send-btn--wide' : ''}`}
+                className={`send-btn`}
               >
-                {paid === false && typeof remainingUses === 'number' && remainingUses > 0 ? (
-                  <span className="flex items-center gap-2">
-                    <span className="send-btn__label">Remaining uses: {remainingUses}</span>
-                    <span className="send-btn__icon">
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4">
-                        <path d="M12 19V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </span>
-                  </span>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4">
-                    <path d="M12 19V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4">
+                  <path d="M12 19V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 10l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             </div>
           </div>
