@@ -7,7 +7,6 @@ RSpec.describe PromptScoringService do
     before do
       # Use memory store cache in test for this spec
       Rails.cache = ActiveSupport::Cache::MemoryStore.new
-      allow(Scorers::HeuristicScorer).to receive(:evaluate).and_return({ score: 70 })
       allow(Scorers::LlmJudgeScorer).to receive(:evaluate).and_return({ score: 80 })
       allow(Scorers::EmpiricalScorer).to receive(:evaluate).and_return({ score: 60 })
     end
@@ -20,8 +19,7 @@ RSpec.describe PromptScoringService do
       result2 = described_class.call(prompt)
       expect(result2[:average]).to eq(70)
 
-      # Heuristic/Llm/Empirical should have been called only once each
-      expect(Scorers::HeuristicScorer).to have_received(:evaluate).once
+      # Llm/Empirical should have been called only once each
       expect(Scorers::LlmJudgeScorer).to have_received(:evaluate).once
       expect(Scorers::EmpiricalScorer).to have_received(:evaluate).once
     end

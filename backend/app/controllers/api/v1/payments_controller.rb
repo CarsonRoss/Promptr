@@ -92,14 +92,16 @@ module Api
       # POST /api/v1/payments/confirm
       # Body: { session_id: 'cs_test_...' }
       def confirm
+        # Revert to simpler, previously working confirm flow
         sid = params[:session_id].to_s
-        # If no session id provided, try cache via device header
+        # If no session id provided or placeholder value, try cache via device header
         if sid.empty? || sid.include?('{CHECKOUT_SESSION_ID}')
           did = request.headers['X-Device-Id'].to_s
           cached = Rails.cache.read(["device:last_checkout_session", did].join(':'))
           sid = cached.to_s if cached.present?
         end
         return render json: { error: 'session_id missing' }, status: :bad_request if sid.blank?
+
         s = Stripe::Checkout::Session.retrieve(sid)
         device_id = s.respond_to?(:metadata) ? s.metadata['device_id'] : s['metadata'] && s['metadata']['device_id']
         return render json: { error: 'missing device_id' }, status: :unprocessable_entity unless device_id.present?

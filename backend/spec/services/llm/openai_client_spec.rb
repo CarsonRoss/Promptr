@@ -60,8 +60,7 @@ RSpec.describe Llm::OpenaiClient do
       system_text = payload.dig('messages', 0, 'content').to_s.downcase
       expect(system_text).to include('get what the llm judge is looking for')
       expect(system_text).to include('get what the empirical judge is looking for')
-      expect(system_text).to include('get what the heuristic judge is looking for')
-      expect(system_text).to match(/satisf(y|ies) .*three judges/)
+      expect(system_text).to match(/satisf(y|ies) .*two judges/)
       # Still enforces json-only output
       expect(system_text).to include('only json')
     end

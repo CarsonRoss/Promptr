@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout } from '../lib/api';
+import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout, getSubscriptionStatus, cancelSubscription, type SubscriptionStatus } from '../lib/api';
 
 export default function ChatInput() {
   const [message, setMessage] = useState('');
   const [selectedModel, setSelectedModel] = useState('claude-sonnet-4.5');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [heuristicScore, setHeuristicScore] = useState<number | null>(null);
   const [llmScore, setLlmScore] = useState<number | null>(null);
   const [empiricalScore, setEmpiricalScore] = useState<number | null>(null);
   const [averageScore, setAverageScore] = useState<number | null>(null);
@@ -16,16 +15,16 @@ export default function ChatInput() {
   const [empiricalReasons, setEmpiricalReasons] = useState<string[] | null>(null);
   const [suggestedPrompt, setSuggestedPrompt] = useState<string | null>(null);
   const [suggestedText, setSuggestedText] = useState<string>('');
-  const [heuristicReasons, setHeuristicReasons] = useState<string[] | null>(null);
   const [paywallOpen, setPaywallOpen] = useState(false)
   const [remainingUses, setRemainingUses] = useState<number | null>(null)
   const [paid, setPaid] = useState<boolean | null>(null)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
+  const [isUpgrading, setIsUpgrading] = useState(false)
 
   // Typewriter display states
   const [llmText, setLlmText] = useState<string>('');
   const [empiricalText, setEmpiricalText] = useState<string>('');
-  const [heuristicText, setHeuristicText] = useState<string>('');
-  const typeIntervalsRef = useRef<{ llm?: number; empirical?: number; heuristic?: number; suggested?: number }>({});
+  const typeIntervalsRef = useRef<{ llm?: number; empirical?: number; suggested?: number }>({});
   // Track last successfully evaluated prompt to avoid duplicate costly runs
   const lastEvaluatedPromptRef = useRef<string | null>(null);
   // Maintain a single-line baseline height; only grow when wrapping
@@ -105,7 +104,6 @@ export default function ChatInput() {
         abortRef.current.abort();
         abortRef.current = null;
       }
-      setHeuristicScore(null);
       setLlmScore(null);
       setEmpiricalScore(null);
       setAverageScore(null);
@@ -113,14 +111,11 @@ export default function ChatInput() {
       setLlmRaw(null);
       setEmpiricalReasons(null);
       setSuggestedPrompt(null);
-      setHeuristicReasons(null);
       setLlmText('');
       setEmpiricalText('');
-      setHeuristicText('');
       // Clear any typewriter timers
       if (typeIntervalsRef.current.llm) window.clearInterval(typeIntervalsRef.current.llm);
       if (typeIntervalsRef.current.empirical) window.clearInterval(typeIntervalsRef.current.empirical);
-      if (typeIntervalsRef.current.heuristic) window.clearInterval(typeIntervalsRef.current.heuristic);
       if (typeIntervalsRef.current.suggested) window.clearInterval(typeIntervalsRef.current.suggested);
       typeIntervalsRef.current = {};
       setSuggestedText('');
@@ -141,16 +136,13 @@ export default function ChatInput() {
     try {
       if (typeIntervalsRef.current.llm) window.clearInterval(typeIntervalsRef.current.llm);
       if (typeIntervalsRef.current.empirical) window.clearInterval(typeIntervalsRef.current.empirical);
-      if (typeIntervalsRef.current.heuristic) window.clearInterval(typeIntervalsRef.current.heuristic);
       if (typeIntervalsRef.current.suggested) window.clearInterval(typeIntervalsRef.current.suggested);
       typeIntervalsRef.current = {};
-  
+
       setLlmText('');
       setEmpiricalText('');
-      setHeuristicText('');
       setLlmReasons(null);
       setEmpiricalReasons(null);
-      setHeuristicReasons(null);
       setSuggestedPrompt(null);
       setSuggestedText('');
   
@@ -170,38 +162,43 @@ export default function ChatInput() {
         throw err;
       }
   
-      const h = res.heuristic?.score ?? null;
       const l = res.llm?.score ?? null;
       const e = res.empirical?.score ?? null;
-  
-      setHeuristicScore(h);
+
       setLlmScore(l);
       setEmpiricalScore(e);
-  
-      setHeuristicReasons(res.heuristic?.reasons ?? null);
+
       setLlmReasons(res.llm?.reasons ?? null);
       setLlmRaw(res.llm?.raw ?? null);
       setEmpiricalReasons(res.empirical?.reasons ?? null);
       setSuggestedPrompt(res.suggested_prompt ?? null);
   
-      const nums = [h, l, e].filter((v): v is number => typeof v === 'number');
+      const nums = [l, e].filter((v): v is number => typeof v === 'number');
       setAverageScore(nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null);
   
       try {
         const status = await getDeviceStatus();
         setRemainingUses(status.remaining_uses);
         setPaid(status.paid);
+
+        // Fetch subscription status if user is paid
+        if (status.paid) {
+          try {
+            const subStatus = await getSubscriptionStatus();
+            setSubscriptionStatus(subStatus);
+          } catch (error) {
+            console.error('Failed to fetch subscription status:', error);
+          }
+        }
       } catch {}
   
       setIsScoring(false);
   
       const llmR = joinReasons(res.llm?.reasons);
       const empR = joinReasons(res.empirical?.reasons);
-      const heuR = joinReasons(res.heuristic?.reasons);
-  
+
       await typeText(llmR, setLlmText, 'llm');
       await typeText(empR, setEmpiricalText, 'empirical');
-      await typeText(heuR, setHeuristicText, 'heuristic');
       await typeText(res.suggested_prompt ?? '', setSuggestedText, 'suggested');
   
       lastEvaluatedPromptRef.current = promptToUse;
@@ -248,6 +245,35 @@ export default function ChatInput() {
     window.open(url, '_blank', 'noopener')
   }
 
+  async function handleCancelSubscription() {
+    if (!confirm('Are you sure you want to cancel your subscription? You will retain access until the end of your current billing period.')) {
+      return
+    }
+
+    try {
+      const result = await cancelSubscription()
+      // Immediately update local UI to reflect cancellation
+      setSubscriptionStatus({
+        active: true, // still active until period end
+        current_period_end: result.access_until,
+        cancel_at_period_end: true,
+        cancelled_at: new Date().toISOString()
+      })
+      // Re-fetch from server to avoid UI reverting on next render cycle
+      try {
+        const refreshed = await getSubscriptionStatus()
+        setSubscriptionStatus(refreshed)
+      } catch (e) {
+        // Non-blocking; UI already updated locally
+      }
+      // Do not set paid=false here; user keeps access until period end
+      showFlash('Subscription cancelled. Access continues until ' + new Date(result.access_until).toLocaleDateString())
+    } catch (error) {
+      showFlash('Failed to cancel subscription. Please try again.')
+      console.error('Cancel subscription error:', error)
+    }
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -263,7 +289,7 @@ export default function ChatInput() {
   async function typeText(
     text: string,
     setter: (v: string) => void,
-    key: 'llm' | 'empirical' | 'heuristic' | 'suggested'
+    key: 'llm' | 'empirical' | 'suggested'
   ): Promise<void> {
     // Clear only this section's previous interval
     const prev = typeIntervalsRef.current[key];
@@ -289,40 +315,88 @@ export default function ChatInput() {
 
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-start justify-center p-6">
-      <div className="w-full max-w-5xl relative flex gap-8">
+      <div className="w-full max-w-5xl relative flex gap-8 pt-16">
         {/* Flash area */}
         <div id="flash-root" className="absolute -top-8 left-1/2 -translate-x-1/2"></div>
-        {/* Top-right upgrade now (hidden if paid) */}
-        {paid === false && (
-          <button
-            className="upgrade-now"
-            onClick={async () => {
-              try {
-                const { url } = await createCheckout()
-                window.location.href = url
-              } catch {}
-            }}
-          >
-            Upgrade Now
-          </button>
-        )}
+
+        {/* Subscription Banner */}
+        <div className="absolute top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+          <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+            {/* Left: Subscription Status */}
+            <div className="flex items-center gap-3">
+              {paid === true ? (
+                <div className="flex items-center gap-2 text-green-700">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">Active Subscription</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-slate-600">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm">Free Trial</span>
+                  {remainingUses !== null && (
+                    <span className="text-xs text-slate-500">({remainingUses} uses left)</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Action Buttons */}
+            <div className="flex items-center gap-3">
+              {paid === true ? (
+                subscriptionStatus?.cancel_at_period_end ? (
+                  <span className="text-sm text-slate-600">
+                    Cancelled — access until {subscriptionStatus.current_period_end ? new Date(subscriptionStatus.current_period_end).toLocaleDateString() : ''}
+                  </span>
+                ) : (
+                  <button
+                    className="px-3 py-1.5 text-sm border border-red-200 bg-white text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    onClick={handleCancelSubscription}
+                  >
+                    Cancel Subscription
+                  </button>
+                )
+              ) : (
+                <button
+                  className="upgrade-now"
+                  disabled={isUpgrading}
+                  onClick={async () => {
+                    if (isUpgrading) return
+                    setIsUpgrading(true)
+                    try {
+                      const { url } = await createCheckout()
+                      if (!url) throw new Error('Missing checkout URL')
+                      window.location.href = url
+                    } catch (e) {
+                      showFlash('Upgrade failed. Please try again.')
+                      console.error('Upgrade error:', e)
+                    } finally {
+                      setIsUpgrading(false)
+                    }
+                  }}
+                >
+                  {isUpgrading ? 'Redirecting…' : 'Upgrade Now'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
         {/* Left scoring panel (modal) */}
         <aside className="w-56 bg-white rounded-2xl shadow-lg border border-slate-200 p-6 flex flex-col items-center gap-6">
           <div className="flex flex-col items-center">
-            <ScoreRing label="" value={averageScore} loading={isScoring} size={96} help={"The average of all judges. Helps you track general prompt quality at a glance. Higher is better."} />
+            <ScoreRing label="" value={averageScore} loading={isScoring} size={96} help={"Weighted average of LLM (60%) and Empirical (40%) scores. Indicates overall prompt quality based on AI evaluation and real-world testing."} />
             <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Overall Score</div>
           </div>
           <div className="flex flex-col items-center">
-            <ScoreRing label="" value={llmScore} loading={isScoring} size={64} help={"Given prompt is run through gpt-4o-mini to evaluate clarity, completeness, feasibility, and ambiguity."} />
+            <ScoreRing label="" value={llmScore} loading={isScoring} size={64} help={"Uses GPT-4o-mini to evaluate prompt quality based on clarity, specificity, feasibility, and completeness criteria."} />
             <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">LLM</div>
           </div>
           <div className="flex flex-col items-center">
-            <ScoreRing label="" value={empiricalScore} loading={isScoring} size={64} help={"Runs the prompt twice to assess format adherence, consistency, and substance."} />
+            <ScoreRing label="" value={empiricalScore} loading={isScoring} size={64} help={"Runs your prompt through GPT-4o-mini twice, then evaluates output consistency, quality, and structure. High scores indicate reliable, well-formatted results."} />
             <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Empirical</div>
-          </div>
-        <div className="flex flex-col items-center">
-            <ScoreRing label="" value={heuristicScore} loading={isScoring} size={64} help={"Checks prompt length, specificity, and common anti-patterns (e.g., vagueness)."} />
-            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Heuristic</div>
           </div>
         </aside>
 
@@ -418,22 +492,23 @@ export default function ChatInput() {
             </div>
           )}
 
-          {/* Heuristic Insights (typewriter) */}
-          {heuristicText && (
-            <div className="px-4 pb-4">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Heuristic Insights</div>
-                <div className="text-slate-700 text-sm whitespace-pre-wrap">{heuristicText}</div>
-              </div>
-            </div>
-          )}
-
-          {/* Suggested Prompt with Copy (animates after heuristic) */}
+          {/* Suggested Prompt with Copy (animates after empirical) */}
           {suggestedText && (
             <div className="px-4 pb-4">
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
                 <div className="flex-1">
                   <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Suggested Prompt</div>
+                  {/* Add success message when score is over 80% */}
+                  {averageScore !== null && averageScore > 80 && (
+                    <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-md">
+                      <div className="text-green-800 text-sm font-medium flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Your prompt is sufficient
+                      </div>
+                    </div>
+                  )}
                   <div className="whitespace-pre-wrap break-words text-slate-700 text-sm">{suggestedText}</div>
                 </div>
                 <div className="flex items-center gap-2">

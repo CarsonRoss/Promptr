@@ -1,5 +1,4 @@
 export type ScoreResponse = {
-  heuristic: { score: number; reasons?: string[]; issues?: string[] }
   llm: { score: number; reasons?: string[]; raw?: string }
   empirical: { score: number; reasons?: string[]; details?: Record<string, unknown> }
   average: number
@@ -66,7 +65,7 @@ export async function createCheckout(signal?: AbortSignal): Promise<{ url: strin
   const res = await fetch(`${BASE_URL}/api/v1/payments/checkout`, {
     method: 'POST',
     headers: authHeaders(),
-    body: JSON.stringify({}),
+    body: JSON.stringify({ device_id: getDeviceId() }),
     signal,
   })
   if (!res.ok) throw new Error(`Checkout failed: ${res.status}`)
@@ -81,6 +80,34 @@ export async function confirmCheckout(sessionId: string, signal?: AbortSignal): 
     signal,
   })
   if (!res.ok) throw new Error(`Confirm failed: ${res.status}`)
+  return res.json()
+}
+
+export type SubscriptionStatus = {
+  active: boolean
+  current_period_end: string
+  cancel_at_period_end: boolean
+  cancelled_at?: string | null
+}
+
+export async function getSubscriptionStatus(signal?: AbortSignal): Promise<SubscriptionStatus> {
+  const res = await fetch(`${BASE_URL}/api/v1/subscription/status`, {
+    method: 'GET',
+    headers: authHeaders(),
+    signal,
+  })
+  if (!res.ok) throw new Error(`Subscription status failed: ${res.status}`)
+  return res.json()
+}
+
+export async function cancelSubscription(signal?: AbortSignal): Promise<{ cancelled: boolean; access_until: string }> {
+  const res = await fetch(`${BASE_URL}/api/v1/subscription/cancel`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({}),
+    signal,
+  })
+  if (!res.ok) throw new Error(`Cancel subscription failed: ${res.status}`)
   return res.json()
 }
 

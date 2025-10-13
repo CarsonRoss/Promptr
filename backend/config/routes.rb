@@ -17,6 +17,8 @@ Rails.application.routes.draw do
       post 'webhooks/stripe', to: 'webhooks#stripe'
       get  'device/status', to: 'devices#status'
       get 'device/reset', to: 'devices#reset'
+      get 'subscription/status', to: 'subscriptions#status'
+      post 'subscription/cancel', to: 'subscriptions#cancel'
     end
   end
 end
