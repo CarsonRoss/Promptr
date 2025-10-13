@@ -400,8 +400,8 @@ export default function ChatInput() {
           </div>
         </aside>
 
-        {/* Main card */}
-        <div className="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200">
+        {/* Main content (no modal/card wrapper) */}
+        <div className="flex-1">
 
           {/* Input with inline send */}
           <div className="p-4 flex items-start gap-6">
@@ -460,58 +460,49 @@ export default function ChatInput() {
             </div>
           )}
 
-          {/* LLM Insights (typewriter) */}
+          {/* LLM Insights (typewriter) - simplified, no modal/card */}
           {llmText && (
             <div className="px-4 pb-4">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">LLM Insights</div>
-                <div className="text-slate-700 text-sm whitespace-pre-wrap">{llmText}</div>
-              </div>
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">LLM Insights</div>
+              <div className="text-slate-700 text-sm whitespace-pre-wrap">{llmText}</div>
             </div>
           )}
 
-          {/* Empirical Insights (typewriter) */}
+          {/* Empirical Insights (typewriter) - simplified */}
           {empiricalText && (
             <div className="px-4 pb-4">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Empirical Insights</div>
-                <div className="text-slate-700 text-sm whitespace-pre-wrap">{empiricalText}</div>
-              </div>
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Empirical Insights</div>
+              <div className="text-slate-700 text-sm whitespace-pre-wrap">{empiricalText}</div>
             </div>
           )}
 
-          {/* Suggested Prompt with Copy (animates after empirical) */}
+          {/* Suggested Prompt with Copy (animates after empirical) - simplified */}
           {suggestedText && (
             <div className="px-4 pb-4">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
-                <div className="flex-1">
-                  <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Suggested Prompt</div>
-                  {/* Add success message when score is over 80% */}
-                  {averageScore !== null && averageScore > 80 && (
-                    <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-md">
-                      <div className="text-green-800 text-sm font-medium flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        Your prompt is sufficient
-                      </div>
-                    </div>
-                  )}
-                  <div className="whitespace-pre-wrap break-words text-slate-700 text-sm">{suggestedText}</div>
+              <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">Suggested Prompt</div>
+              {averageScore !== null && averageScore > 80 && (
+                <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-md">
+                  <div className="text-green-800 text-sm font-medium flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Your prompt is sufficient
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CopyButton text={suggestedPrompt ?? ''} />
-                  {suggestedPrompt && (
-                    <button className="send-suggested-btn" onClick={sendSuggestedPrompt}>
-                      Grade this prompt
-                    </button>
-                  )}
-                  {paid === true && (
-                    <button className="send-chatgpt-btn" onClick={sendToChatGPT}>
-                      Send to ChatGPT
-                    </button>
-                  )}
-                </div>
+              )}
+              <div className="whitespace-pre-wrap break-words text-slate-700 text-sm">{suggestedText}</div>
+              <div className="flex items-center gap-2 mt-3">
+                <CopyButton text={suggestedPrompt ?? ''} />
+                {suggestedPrompt && (
+                  <button className="send-suggested-btn" onClick={sendSuggestedPrompt}>
+                    Grade this prompt
+                  </button>
+                )}
+                {paid === true && (
+                  <button className="send-chatgpt-btn" onClick={sendToChatGPT}>
+                    Send to ChatGPT
+                  </button>
+                )}
               </div>
             </div>
           )}
