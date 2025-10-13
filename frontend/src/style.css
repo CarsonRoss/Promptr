@@ -73,6 +73,50 @@ button:focus-visible {
   }
 }
 
+/* ------------------------- */
+/* Dark mode (class-based)   */
+/* ------------------------- */
+.dark {
+  background-color: #0b1120; /* slate-950 */
+  color: #e5e7eb; /* gray-200 */
+}
+
+/* Banner (active subscription) */
+.dark .subscription-banner {
+  background: #0f172a; /* slate-900 */
+  border-color: #1f2937; /* gray-800 */
+  color: #e5e7eb;
+}
+.dark .subscription-banner .text-slate-600 { color: #cbd5e1; }
+.dark .subscription-banner .text-green-700 { color: #34d399; }
+
+/* Scorers panel (left rings) */
+.dark .border-slate-200 { border-color: #1f2937; }
+.dark .bg-white { background: #0f172a; }
+.dark .text-slate-500 { color: #94a3b8; }
+
+/* Insights text output */
+.dark .text-slate-700 { color: #ffffff; }
+.dark .whitespace-pre-wrap { color: #ffffff; }
+
+/* Send button */
+.dark .send-btn {
+  background: #111827; /* gray-900 */
+  color: #f9fafb;       /* gray-50 */
+  border-color: #1f2937;/* gray-800 */
+}
+.dark .send-btn:hover { background: #1f2937; }
+
+/* Action buttons */
+.dark .send-suggested-btn { background: #1d4ed8; border-color: #1e40af; }
+.dark .send-suggested-btn:hover { background: #1e40af; }
+.dark .send-chatgpt-btn { background: #059669; border-color: #047857; }
+.dark .send-chatgpt-btn:hover { background: #047857; }
+
+/* Paywall banner (keep readable) */
+.dark .upgrade-btn { background: #111827; color: #e5e7eb; border-color: #1f2937; }
+.dark .upgrade-btn:hover { background: #0b1220; }
+
 /* Chat input send button - fixed circular control */
 .send-btn {
   position: absolute;

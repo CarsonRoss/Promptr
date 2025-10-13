@@ -320,7 +320,7 @@ export default function ChatInput() {
         <div id="flash-root" className="absolute -top-8 left-1/2 -translate-x-1/2"></div>
 
         {/* Subscription Banner */}
-        <div className="absolute top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+        <div className="subscription-banner absolute top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-sm">
           <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
             {/* Left: Subscription Status */}
             <div className="flex items-center gap-3">

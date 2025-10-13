@@ -5,7 +5,7 @@ module Llm
   class OpenaiClient
     OPENAI_URL = URI('https://api.openai.com/v1/chat/completions')
 
-    def self.judge_prompt(prompt, model: ENV.fetch('OPENAI_MODEL', 'gpt-4o-mini'), timeout: 10, max_retries: 2)
+    def self.judge_prompt(prompt, model: ENV.fetch('OPENAI_MODEL', 'gpt-4o-mini'), timeout: 20, max_retries: 3)
       # Build a strict JSON-only instruction
       system_prompt = <<~PROMPT
         You are a prompt quality evaluator. Rate the user's prompt from 0-100 based on:
@@ -37,12 +37,14 @@ module Llm
         ],
         temperature: 0.0,
         # Ask the API to emit valid JSON only when supported by the model
-        response_format: { type: 'json_object' }
+        response_format: { type: 'json_object' },
+        max_tokens: 200
       }
 
       http = Net::HTTP.new(OPENAI_URL.host, OPENAI_URL.port)
       http.use_ssl = true
       http.read_timeout = timeout
+      http.open_timeout = timeout
       req = Net::HTTP::Post.new(OPENAI_URL.request_uri)
       api_key = ENV['OPENAI_API_KEY']
       req['Authorization'] = "Bearer #{api_key}" if api_key && !api_key.empty?
@@ -52,55 +54,67 @@ module Llm
       attempts = 0
       t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f
       Rails.logger.info("[LLM::OpenaiClient] judge_prompt START model=#{model} timeout=#{timeout}s") if defined?(Rails)
-      begin
+      loop do
         attempts += 1
-        res = http.request(req)
-        status = res.code.to_i rescue 0
-        raw_body = res.body.to_s
-        body = JSON.parse(raw_body) rescue {}
-        elapsed = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f) - t0) * 1000.0
-        Rails.logger.info("[LLM::OpenaiClient] judge_prompt HTTP #{status} elapsed=#{elapsed.round}ms") if defined?(Rails)
-        Rails.logger.debug("[LLM::OpenaiClient] judge_prompt raw body: #{raw_body}") if defined?(Rails)
-
-        # Non-200 -> return error context
-        if status != 200
-          return { 'score' => 0, 'reasons' => ["judge http #{status}"], 'raw' => raw_body }
-        end
-
-        # OpenAI error envelope
-        if body.is_a?(Hash) && body['error']
-          msg = body.dig('error', 'message').to_s
-          return { 'score' => 0, 'reasons' => ["judge error: #{msg}"], 'raw' => raw_body }
-        end
-
-        content = body.dig('choices', 0, 'message', 'content').to_s
-        Rails.logger.info("[LLM::OpenaiClient] judge_prompt raw content: #{content.inspect}") if defined?(Rails)
-
         begin
-          parsed = JSON.parse(content)
-          if parsed.is_a?(Hash) && parsed.key?('score')
-            parsed['raw'] = content
-            return parsed
+          res = http.request(req)
+          status = res.code.to_i rescue 0
+          raw_body = res.body.to_s
+          body = JSON.parse(raw_body) rescue {}
+          elapsed = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f) - t0) * 1000.0
+          Rails.logger.info("[LLM::OpenaiClient] judge_prompt HTTP #{status} elapsed=#{elapsed.round}ms") if defined?(Rails)
+          Rails.logger.debug("[LLM::OpenaiClient] judge_prompt raw body: #{raw_body}") if defined?(Rails)
+
+          # Non-200 -> retry on transient or return error
+          if status != 200
+            if (status >= 500 || status == 429) && attempts <= max_retries
+              sleep(0.4 * (2 ** (attempts - 1)))
+              next
+            end
+            return { 'score' => 0, 'reasons' => ["judge http #{status}"], 'raw' => raw_body }
           end
-        rescue JSON::ParserError
-          # Attempt to extract a JSON object from fenced or prefixed text
-          extracted = extract_json_object(content)
-          if extracted
-            begin
-              parsed2 = JSON.parse(extracted)
-              if parsed2.is_a?(Hash) && parsed2.key?('score')
-                parsed2['raw'] = content
-                return parsed2
+
+          # OpenAI error envelope
+          if body.is_a?(Hash) && body['error']
+            msg = body.dig('error', 'message').to_s
+            return { 'score' => 0, 'reasons' => ["judge error: #{msg}"], 'raw' => raw_body }
+          end
+
+          content = body.dig('choices', 0, 'message', 'content').to_s
+          Rails.logger.info("[LLM::OpenaiClient] judge_prompt raw content: #{content.inspect}") if defined?(Rails)
+
+          begin
+            parsed = JSON.parse(content)
+            if parsed.is_a?(Hash) && parsed.key?('score')
+              parsed['raw'] = content
+              return parsed
+            end
+          rescue JSON::ParserError
+            # Attempt to extract a JSON object from fenced or prefixed text
+            extracted = extract_json_object(content)
+            if extracted
+              begin
+                parsed2 = JSON.parse(extracted)
+                if parsed2.is_a?(Hash) && parsed2.key?('score')
+                  parsed2['raw'] = content
+                  return parsed2
+                end
+              rescue JSON::ParserError
+                # still invalid; continue
               end
-            rescue JSON::ParserError
-              # still invalid; continue
             end
           end
+
+          # If we reached here, content was not valid JSON with score; break and fall through
+          break
+        rescue Timeout::Error, Errno::ECONNRESET, Errno::ETIMEDOUT => e
+          Rails.logger.warn("[LLM::OpenaiClient] judge_prompt retry=#{attempts} due to #{e.class}") if defined?(Rails)
+          if attempts <= max_retries
+            sleep(0.4 * (2 ** (attempts - 1)))
+            next
+          end
+          return { 'score' => 0, 'reasons' => ["judge unavailable: #{e.class}"] }
         end
-      rescue Timeout::Error, Errno::ECONNRESET, Errno::ETIMEDOUT => e
-        Rails.logger.warn("[LLM::OpenaiClient] judge_prompt retry=#{attempts} due to #{e.class}") if defined?(Rails)
-        retry if attempts <= max_retries
-        return { 'score' => 0, 'reasons' => ["judge unavailable: #{e.class}"] }
       end
 
       Rails.logger.warn("[LLM::OpenaiClient] judge_prompt invalid json, content: #{content.inspect}") if defined?(Rails)
