@@ -127,80 +127,84 @@ export default function ChatInput() {
     }
   }, [message]);
 
-  async function handleSend() {
-    const trimmed = message.trim();
-    if (!trimmed || isScoring) return;
-    // Skip if same as the last evaluated prompt to prevent duplicate AI calls
-    if (lastEvaluatedPromptRef.current === trimmed) return;
-    // Skip network during tests
+  async function handleSend(inputMessage?: string) {
+    const promptToUse = (inputMessage ?? message).trim();
+    if (!promptToUse || isScoring) return;
+  
+    if (lastEvaluatedPromptRef.current === promptToUse) return;
     if (import.meta.env.MODE === 'test') return;
+  
     if (abortRef.current) abortRef.current.abort();
     const ac = new AbortController();
     abortRef.current = ac;
+  
     try {
-      // Clear prior judge responses immediately for new prompt
       if (typeIntervalsRef.current.llm) window.clearInterval(typeIntervalsRef.current.llm);
       if (typeIntervalsRef.current.empirical) window.clearInterval(typeIntervalsRef.current.empirical);
       if (typeIntervalsRef.current.heuristic) window.clearInterval(typeIntervalsRef.current.heuristic);
       if (typeIntervalsRef.current.suggested) window.clearInterval(typeIntervalsRef.current.suggested);
       typeIntervalsRef.current = {};
+  
       setLlmText('');
       setEmpiricalText('');
       setHeuristicText('');
       setLlmReasons(null);
       setEmpiricalReasons(null);
       setHeuristicReasons(null);
-        setSuggestedPrompt(null);
+      setSuggestedPrompt(null);
       setSuggestedText('');
-
+  
       setIsScoring(true);
-      let res: ScoreResponse
+  
+      let res: ScoreResponse;
       try {
-        res = await scorePrompt(trimmed, ac.signal);
+        res = await scorePrompt(promptToUse, ac.signal);
       } catch (err: any) {
         if (err && err.status === 402) {
-          setIsScoring(false)
-          setPaywallOpen(true)
-          setPaid(false)
-          setRemainingUses(err.body?.remaining_uses ?? 0)
-          return
+          setIsScoring(false);
+          setPaywallOpen(true);
+          setPaid(false);
+          setRemainingUses(err.body?.remaining_uses ?? 0);
+          return;
         }
-        throw err
+        throw err;
       }
+  
       const h = res.heuristic?.score ?? null;
       const l = res.llm?.score ?? null;
       const e = res.empirical?.score ?? null;
+  
       setHeuristicScore(h);
       setLlmScore(l);
       setEmpiricalScore(e);
+  
       setHeuristicReasons(res.heuristic?.reasons ?? null);
       setLlmReasons(res.llm?.reasons ?? null);
       setLlmRaw(res.llm?.raw ?? null);
       setEmpiricalReasons(res.empirical?.reasons ?? null);
       setSuggestedPrompt(res.suggested_prompt ?? null);
+  
       const nums = [h, l, e].filter((v): v is number => typeof v === 'number');
       setAverageScore(nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null);
-
-      // Refresh remaining uses after a successful scoring request
+  
       try {
-        const status = await getDeviceStatus()
-        setRemainingUses(status.remaining_uses)
-        setPaid(status.paid)
+        const status = await getDeviceStatus();
+        setRemainingUses(status.remaining_uses);
+        setPaid(status.paid);
       } catch {}
-
-      // Hide loader before typing so users can read progressively
+  
       setIsScoring(false);
-
-      // Sequentially render LLM → Empirical → Heuristic → Suggested Prompt
+  
       const llmR = joinReasons(res.llm?.reasons);
       const empR = joinReasons(res.empirical?.reasons);
       const heuR = joinReasons(res.heuristic?.reasons);
+  
       await typeText(llmR, setLlmText, 'llm');
       await typeText(empR, setEmpiricalText, 'empirical');
       await typeText(heuR, setHeuristicText, 'heuristic');
       await typeText(res.suggested_prompt ?? '', setSuggestedText, 'suggested');
-      // Record the last prompt only after a successful end-to-end cycle
-      lastEvaluatedPromptRef.current = trimmed;
+  
+      lastEvaluatedPromptRef.current = promptToUse;
     } catch (_e) {
       // ignore for now
     } finally {
@@ -222,13 +226,18 @@ export default function ChatInput() {
   }
 
   async function sendSuggestedPrompt() {
-    if (!suggestedPrompt) return
-    try { await navigator.clipboard.writeText(suggestedPrompt) } catch {}
-    // Ensure we don't block on duplicate-guard; server also dedups/debounces
-    lastEvaluatedPromptRef.current = null
-    setMessage(suggestedPrompt)
-    // Defer to allow state to update textarea, then submit
-    setTimeout(() => { void handleSend() }, 0)
+    if (!suggestedPrompt) return;
+    try {
+      await navigator.clipboard.writeText(suggestedPrompt);
+    } catch {}
+  
+    // Update the text input to show the suggested prompt
+    setMessage(suggestedPrompt);
+  
+    lastEvaluatedPromptRef.current = null;
+  
+    // Pass suggestedPrompt to handleSend
+    await handleSend(suggestedPrompt);
   }
 
   function sendToChatGPT() {
@@ -304,11 +313,11 @@ export default function ChatInput() {
             <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Overall Score</div>
           </div>
           <div className="flex flex-col items-center">
-            <ScoreRing label="" value={llmScore} loading={isScoring} size={64} help={"Evaluates clarity, completeness, feasibility, and ambiguity. Returns a 0–100 score with reasons."} />
+            <ScoreRing label="" value={llmScore} loading={isScoring} size={64} help={"Given prompt is run through gpt-4o-mini to evaluate clarity, completeness, feasibility, and ambiguity."} />
             <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">LLM</div>
           </div>
           <div className="flex flex-col items-center">
-            <ScoreRing label="" value={empiricalScore} loading={isScoring} size={64} help={"Runs the prompt multiple times to assess format adherence, consistency, and substance."} />
+            <ScoreRing label="" value={empiricalScore} loading={isScoring} size={64} help={"Runs the prompt twice to assess format adherence, consistency, and substance."} />
             <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Empirical</div>
           </div>
         <div className="flex flex-col items-center">

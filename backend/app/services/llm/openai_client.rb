@@ -8,7 +8,22 @@ module Llm
     def self.judge_prompt(prompt, model: ENV.fetch('OPENAI_MODEL', 'gpt-4o-mini'), timeout: 10, max_retries: 2)
       # Build a strict JSON-only instruction
       system_prompt = <<~PROMPT
-        You are a prompt quality evaluator. Given a user's prompt, rate it 0-100 on: Clarity, Completeness, Feasibility, Ambiguity. Return ONLY JSON: {"score": number, "reasons": string[]}. No extra text.
+        You are a prompt quality evaluator. Rate the user's prompt from 0-100 based on:
+        - Clarity: Is the request clear and unambiguous?
+        - Completeness: Does it provide necessary details?
+        - Feasibility: Can this be reasonably accomplished?
+        - Specificity: Are requirements well-defined?
+        
+        Return ONLY valid JSON: {"score": number, "reasons": string[]}
+        
+        Scoring guidelines:
+        - 90-100: Excellent prompt with clear intent, specific requirements, and all necessary context
+        - 80-89: Good prompt with minor room for improvement
+        - 70-79: Decent prompt but missing some important details
+        - 60-69: Acceptable but vague or incomplete
+        - Below 60: Significant issues with clarity or completeness
+        
+        Be fair and reward well-structured prompts. Only deduct points for genuine issues.
       PROMPT
 
       payload = {
@@ -170,6 +185,7 @@ module Llm
         3) What the Heuristic judge is looking for (clarity, completeness, feasibility, lack of ambiguity).
 
         Your task: Produce ONLY JSON with a single key suggested_prompt (string) that is an improved prompt which simultaneously satisfies the requirements of all three judges above. The suggested prompt must be specific, feasible, unambiguous, and—when appropriate—explicitly request the desired output format (e.g., JSON keys or list length) to maximize Empirical consistency. No prose, no code fences, only JSON.
+        Separate sentences with a newline.
       PROMPT
 
       payload = {

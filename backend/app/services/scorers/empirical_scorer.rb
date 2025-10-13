@@ -13,7 +13,7 @@ module Scorers
         threads << Thread.new do
           ti = Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f
           begin
-            out = Llm::OpenaiClient.run_prompt(text, temperature: 0.2, timeout: 8, max_retries: 1, max_tokens: 300)
+            out = Llm::OpenaiClient.run_prompt(text, temperature: 0.2, timeout: 30, max_retries: 1, max_tokens: 16384)
             outputs[i] = out
           ensure
             ei = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f) - ti) * 1000.0
@@ -33,15 +33,9 @@ module Scorers
       Rails.logger.info("[EmpiricalScorer] format_points=#{format_points} msgs=#{format_msgs}") if defined?(Rails)
       score += format_points
       if format_msgs.any?
-        reasons.concat(format_msgs.map { |m| "Output formatting: #{m}." })
+        reasons.concat(format_msgs.map { |m| "Output structure: #{m}." })
       elsif format_points == 0
-        if fmt_ctx[:want_json]
-          reasons << 'JSON was requested, but the outputs were not valid JSON.'
-        elsif fmt_ctx[:want_list]
-          reasons << 'A list format was requested, but list markers/structure were not detected in the outputs.'
-        else
-          reasons << 'The prompt does not request a concrete output format (e.g., JSON keys or an explicit list), so empirical consistency is limited.'
-        end
+        reasons << 'The outputs lack clear structure. Consider requesting a specific format (JSON, list, code, etc.) or asking for organized sections.'
       end
 
       # 2) Consistency across runs (0..40)
@@ -76,62 +70,176 @@ module Scorers
     end
 
     def self.format_score(prompt, outputs)
-      want_json = prompt.downcase.include?('json')
-      want_list = prompt.downcase.match?(/\b(list|bullets?)\b/)
-
       points = 0
       messages = []
-      json_ok = 0
-      list_detected = 0
+      
+      # Instead of checking if JSON/list was requested, check if outputs are well-structured
       outputs.each do |out|
         next unless out
-        if want_json
-          begin
-            JSON.parse(out)
-            points += 20
-            messages << 'JSON output valid'
-            json_ok += 1
-          rescue JSON::ParserError
-          end
+        output_text = out.to_s.strip
+        next if output_text.empty?
+        
+        structure_points = 0
+        
+        # 1. Check for structured content (any format)
+        has_structure = false
+        
+        # JSON structure
+        if output_text.match?(/\{[\s\S]*\}/) && output_text.match?(/"[\w_]+"\s*:/)
+          structure_points += 10
+          messages << 'Structured JSON-like output detected' unless messages.include?('Structured JSON-like output detected')
+          has_structure = true
         end
-        if want_list
-          if out.include?("\n-") || out.include?("\n*") || out.strip.start_with?('- ')
-            points += 10
-            messages << 'List format detected'
-            list_detected += 1
-          end
-          if out.lines.size >= 5
-            points += 10
-            messages << 'List length adequate'
-          end
+        
+        # Code structure (functions, classes, methods)
+        if output_text.match?(/\b(def|function|class|const|let|var)\s+\w+/i)
+          structure_points += 10
+          messages << 'Code structure detected' unless messages.include?('Code structure detected')
+          has_structure = true
         end
+        
+        # List structure (bullets, numbered, etc.)
+        if output_text.match?(/(?:^|\n)\s*[-*•]\s+\w+/) || output_text.match?(/(?:^|\n)\s*\d+\.\s+\w+/)
+          structure_points += 8
+          messages << 'List structure detected' unless messages.include?('List structure detected')
+          has_structure = true
+        end
+        
+        # Table/columnar structure
+        if output_text.match?(/\|.*\|/) && output_text.scan(/\|/).count >= 4
+          structure_points += 8
+          messages << 'Table structure detected' unless messages.include?('Table structure detected')
+          has_structure = true
+        end
+        
+        # 2. Check for organization (paragraphs, sections, etc.)
+        if output_text.lines.count >= 3
+          structure_points += 5
+        end
+        
+        # 3. If no clear structure, check if it's a coherent response
+        if !has_structure && output_text.length >= 50
+          structure_points += 5
+          messages << 'Coherent text response' unless messages.include?('Coherent text response')
+        end
+        
+        points += [structure_points, 20].min
       end
-      ctx = { want_json: want_json, want_list: want_list, json_ok: json_ok, list_detected: list_detected }
+      
+      ctx = { has_structure: points > 0 }
       [[points, 40].min, messages, ctx]
     end
     private_class_method :format_score
+
+    # Add this new method before format_score
+    def self.detect_json_request(prompt)
+      text = prompt.downcase
+      # Direct JSON mentions
+      return true if text.include?('json')
+      
+      # Format requests
+      return true if text.match?(/\b(format|return|output|provide)\s+(as\s+)?json\b/)
+      return true if text.match?(/\bjson\s+(format|object|response|output)\b/)
+      
+      # Structure requests that imply JSON
+      return true if text.include?('keys') && text.include?('{')
+      return true if text.match?(/\bkeys?\s*[:=]\s*\[/)
+      
+      false
+    end
+    private_class_method :detect_json_request
+
+    def self.extract_json_from_text(text)
+      return nil if text.to_s.strip.empty?
+      s = text.dup
+      # Strip ```json fences if present
+      if s =~ /```json([\s\S]*?)```/i
+        return $1.strip
+      end
+      # Fallback: grab the first {...} balanced region
+      start = s.index('{')
+      return nil unless start
+      # naive scan to last '}'
+      last = s.rindex('}')
+      return nil unless last && last > start
+      candidate = s[start..last]
+      candidate
+    end
+    private_class_method :extract_json_from_text
 
     def self.consistency_score(outputs)
       return [1.0, 0] if outputs.length < 2
       a, b = outputs[0].to_s, outputs[1].to_s
       return [0.0, 40] if a == b && a.length > 0
+      
       distance = normalized_edit_distance(a, b)
       variance = distance
-      points = ((1.0 - distance) * 40.0)
+      
+      if distance <= 0.2
+        # Very similar (80%+) → full points
+        points = 40
+      elsif distance <= 0.4
+        # Moderately similar (60-80%) → 30-40 points
+        # Linear interpolation: 40 - ((distance - 0.2) / 0.2) * 10
+        points = 40 - ((distance - 0.2) / 0.2) * 10
+      elsif distance <= 0.6
+        # Somewhat similar (40-60%) → 20-30 points
+        # Linear interpolation: 30 - ((distance - 0.4) / 0.2) * 10
+        points = 30 - ((distance - 0.4) / 0.2) * 10
+      elsif distance <= 0.8
+        # Slightly similar (20-40%) → 10-20 points
+        # Linear interpolation: 20 - ((distance - 0.6) / 0.2) * 10
+        points = 20 - ((distance - 0.6) / 0.2) * 10
+      else
+        # Very different (0-20%) → 0-10 points
+        points = [10 - ((distance - 0.8) / 0.2) * 10, 0].max
+      end
+      
       [variance, points.round.clamp(0, 40)]
     end
     private_class_method :consistency_score
 
     def self.quality_score(outputs)
-      out = outputs.first.to_s
-      return 0 if out.strip.empty?
-      return 0 if HEDGED_PATTERNS.any? { |r| out.match?(r) }
-      pts = 10
-      pts += 5 if out.length >= 100
-      pts += 5 if out =~ /\d/ # presence of actionable items often has numbers
-      pts.clamp(0, 20)
+      return 0 if outputs.empty?
+      
+      total_points = 0
+      valid_outputs = 0
+      
+      outputs.each do |out|
+        output_text = out.to_s
+        next if output_text.strip.empty?
+        
+        # Skip hedged responses
+        next if HEDGED_PATTERNS.any? { |r| output_text.match?(r) }
+        
+        # More reasonable quality thresholds
+        pts = 0
+        
+        # Length-based scoring (more granular)
+        if output_text.length >= 200
+          pts += 10  # Substantial response
+        elsif output_text.length >= 100
+          pts += 8   # Good response
+        elsif output_text.length >= 50
+          pts += 5   # Adequate response
+        elsif output_text.length >= 20
+          pts += 3   # Minimal response
+        else
+          pts += 1   # Very short response
+        end
+        
+        # Content quality bonuses
+        pts += 3 if output_text =~ /\d/  # Contains numbers
+        pts += 2 if output_text.match?(/\b(step|process|method|way|how|what|why|when|where)\b/i)  # Actionable content
+        pts += 2 if output_text.match?(/\b(first|second|third|next|then|finally|also|additionally)\b/i)  # Structured content
+        
+        total_points += pts
+        valid_outputs += 1
+      end
+      
+      return 0 if valid_outputs == 0
+      (total_points.to_f / valid_outputs).round.clamp(0, 20)
     end
-    private_class_method :quality_score
 
     def self.normalized_edit_distance(a, b)
       return 0.0 if a == b
