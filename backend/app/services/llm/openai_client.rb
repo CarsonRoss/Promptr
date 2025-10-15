@@ -202,6 +202,10 @@ module Llm
         Extract Evaluation Criteria
         Clearly list what the LLM judge is rewarding (clarity, reasoning quality, relevance, etc.).
         Clearly list what the Empirical judge is rewarding (structured, consistent, correctly formatted outputs such as JSON, lists, or tables).
+        VERY IMPORTANT: Output ONLY a JSON object with exactly one key: "suggested_prompt".
+        - No other keys, no code fences, no explanations.
+        - The value must be a refined, directly-usable prompt that is specific, feasible, unambiguous,
+          and requests an output format when appropriate for consistency.
 
         Synthesize an Improved Prompt
         Write a single, improved prompt that satisfies both judges’ criteria simultaneously.
@@ -225,10 +229,6 @@ module Llm
         1. <Step 1>
         2. <Step 2>
         3. <Step 3>
-        Output ONLY a JSON object with exactly one key: "suggested_prompt".
-        - No other keys, no code fences, no explanations.
-        - The value must be a refined, directly-usable prompt that is specific, feasible, unambiguous,
-          and requests an output format when appropriate for consistency.
       PROMPT
     
       llm_reasons = Array((llm && (llm[:reasons] || llm['reasons'])) || []).map { |r| "- #{r}" }.join("\n")
