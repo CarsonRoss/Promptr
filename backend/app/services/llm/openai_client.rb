@@ -188,35 +188,73 @@ module Llm
     # Generate a better prompt suggestion given original prompt and judge data.
     # Returns { 'suggested_prompt' => String }
     def self.suggest_prompt(original_prompt, heuristic:, llm:, empirical:, model: ENV.fetch('OPENAI_MODEL', 'gpt-4o-mini'), timeout: 10)
+      normalized_prompt = original_prompt.to_s.gsub(/\s+/, ' ').strip
+    
       system_prompt = <<~PROMPT
-        You are a prompt improvement assistant.
+        You are a Prompt Refinement Assistant.
+
         You will receive:
-        - The user's original prompt
-        - LLM judge reasons
-        - Empirical judge reasons
+        The user’s original prompt
+        The LLM judge’s reasons
+        The Empirical judge’s reasons
 
-        First, derive explicitly:
-        1) What the LLM judge is looking for (criteria to maximize LLM judge score).
-        2) What the Empirical judge is looking for (criteria that lead to consistent, well‑formatted outputs such as JSON or lists as applicable. If the function doesn't need to return a response, this isn't needed).
+        Your job:
+        Extract Evaluation Criteria
+        Clearly list what the LLM judge is rewarding (clarity, reasoning quality, relevance, etc.).
+        Clearly list what the Empirical judge is rewarding (structured, consistent, correctly formatted outputs such as JSON, lists, or tables).
 
-        Your task: Produce an improved prompt which simultaneously satisfies the requirements of both judges above. The suggested prompt must be specific, feasible, unambiguous, and—when appropriate—explicitly request the desired output format (e.g., JSON keys or list length) to maximize Empirical consistency. No prose, no code fences.
+        Synthesize an Improved Prompt
+        Write a single, improved prompt that satisfies both judges’ criteria simultaneously.
+        The prompt must be:
+        Specific – remove ambiguity and vague instructions.
+        Feasible – within what an LLM can reliably perform.
+        Format-explicit – specify expected structure or keys (e.g., JSON, numbered list).
+        Task-aware – if the user’s input is code-related (debugging, feature creation, system design), produce a step-by-step task plan.
+        Scope-checked – if the user asks for too much, recommend breaking it into smaller steps.
+
+        Gap-Filling Rule
+        Fill in all missing context you can infer directly from the given input.
+        Where you cannot infer, insert placeholders in angle brackets: <placeholder>.
+        Do not explicitly ask the user for more details—show them where to fill in instead.
+
+        Output Format
+        Your response must have exactly this structure:
+
+        [Improved Prompt]
+        Fix <bug description / create new method / design code / etc.> by doing:
+        1. <Step 1>
+        2. <Step 2>
+        3. <Step 3>
+        Output ONLY a JSON object with exactly one key: "suggested_prompt".
+        - No other keys, no code fences, no explanations.
+        - The value must be a refined, directly-usable prompt that is specific, feasible, unambiguous,
+          and requests an output format when appropriate for consistency.
       PROMPT
-
+    
+      llm_reasons = Array((llm && (llm[:reasons] || llm['reasons'])) || []).map { |r| "- #{r}" }.join("\n")
+      emp_reasons = Array((empirical && (empirical[:reasons] || empirical['reasons'])) || []).map { |r| "- #{r}" }.join("\n")
+    
+      user_content = <<~USER
+        Original prompt:
+        #{normalized_prompt}
+    
+        LLM judge reasons:
+        #{llm_reasons}
+    
+        Empirical judge reasons:
+        #{emp_reasons}
+      USER
+    
       payload = {
         model: model,
         messages: [
           { role: 'system', content: system_prompt },
-          { role: 'user', content: {
-            original_prompt: original_prompt.to_s,
-            heuristic: heuristic || { score: 0, reasons: [] }, # Handle nil heuristic
-            llm: llm,
-            empirical: empirical
-          }.to_json }
+          { role: 'user', content: user_content }
         ],
         temperature: 0.2,
         response_format: { type: 'json_object' }
       }
-
+    
       http = Net::HTTP.new(OPENAI_URL.host, OPENAI_URL.port)
       http.use_ssl = true
       http.read_timeout = timeout
@@ -225,33 +263,34 @@ module Llm
       req['Authorization'] = "Bearer #{api_key}" if api_key && !api_key.empty?
       req['Content-Type'] = 'application/json'
       req.body = JSON.dump(payload)
-
+    
       res = http.request(req)
-      status = res.code.to_i rescue 0
       raw_body = res.body.to_s
       body = JSON.parse(raw_body) rescue {}
       content = body.dig('choices', 0, 'message', 'content').to_s
-
+      content = content.gsub(/\s+\z/, '').strip
+    
       begin
         parsed = JSON.parse(content)
-        if parsed.is_a?(Hash) && parsed['suggested_prompt']
+        if parsed.is_a?(Hash) && parsed['suggested_prompt'].is_a?(String) && !parsed['suggested_prompt'].strip.empty?
           return parsed
         end
       rescue JSON::ParserError
-        # attempt to extract fenced json
         extracted = extract_json_object(content)
         if extracted
           begin
             parsed2 = JSON.parse(extracted)
-            return parsed2 if parsed2.is_a?(Hash) && parsed2['suggested_prompt']
+            if parsed2.is_a?(Hash) && parsed2['suggested_prompt'].is_a?(String) && !parsed2['suggested_prompt'].strip.empty?
+              return parsed2
+            end
           rescue JSON::ParserError
           end
         end
       end
-
-      { 'suggested_prompt' => original_prompt.to_s }
-    rescue => e
-      { 'suggested_prompt' => original_prompt.to_s }
+    
+      { 'suggested_prompt' => normalized_prompt }
+    rescue => _
+      { 'suggested_prompt' => normalized_prompt }
     end
   end
 end
