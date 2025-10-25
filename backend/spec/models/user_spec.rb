@@ -27,7 +27,7 @@ RSpec.describe User, type: :model do
     expect(token).to be_a(String)
     expect(token.length).to be > 10
 
-    expect { u.verify_email! }.to change { u.reload.verified_at }.from(nil)
+    expect { u.verify_email_timestamp! }.to change { u.reload.verified_at }.from(nil)
   end
 
   it 'reports active_subscription? based on status' do
