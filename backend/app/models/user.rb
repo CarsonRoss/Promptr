@@ -7,7 +7,7 @@ class User < ApplicationRecord
 
     validates :email, presence: true, uniqueness: true
     validates :status, presence: true, inclusion: { in: STATUSES }
-    validates :password, length: { minimum: 8 }, allow_nil: false
+    validates :password, length: { minimum: 8 }, allow_nil: true
 
     scope :paid, -> { where(status: 'paid') }
     scope :unpaid, -> { where(status: 'unpaid') }
@@ -22,7 +22,7 @@ class User < ApplicationRecord
         token
     end
 
-    def verify_email!
+    def verify_email_timestamp!
         update!(verified_at: Time.current)
     end
 end

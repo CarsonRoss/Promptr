@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import AuthModal from './AuthModal';
 import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout, getSubscriptionStatus, cancelSubscription, type SubscriptionStatus } from '../lib/api';
 
 export default function ChatInput() {
@@ -20,6 +21,7 @@ export default function ChatInput() {
   const [paid, setPaid] = useState<boolean | null>(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
   const [isUpgrading, setIsUpgrading] = useState(false)
+  const [authOpen, setAuthOpen] = useState(false)
 
   // Typewriter display states
   const [llmText, setLlmText] = useState<string>('');
@@ -395,26 +397,35 @@ export default function ChatInput() {
                   </button>
                 )
               ) : (
-                <button
-                  className="upgrade-now"
-                  disabled={isUpgrading}
-                  onClick={async () => {
-                    if (isUpgrading) return
-                    setIsUpgrading(true)
-                    try {
-                      const { url } = await createCheckout()
-                      if (!url) throw new Error('Missing checkout URL')
-                      window.location.href = url
-                    } catch (e) {
-                      showFlash('Upgrade failed. Please try again.')
-                      console.error('Upgrade error:', e)
-                    } finally {
-                      setIsUpgrading(false)
-                    }
-                  }}
-                >
-                  {isUpgrading ? 'Redirecting…' : 'Upgrade Now'}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    className="upgrade-now"
+                    disabled={isUpgrading}
+                    onClick={async () => {
+                      if (isUpgrading) return
+                      setIsUpgrading(true)
+                      try {
+                        const { url } = await createCheckout()
+                        if (!url) throw new Error('Missing checkout URL')
+                        window.location.href = url
+                      } catch (e) {
+                        showFlash('Upgrade failed. Please try again.')
+                        console.error('Upgrade error:', e)
+                      } finally {
+                        setIsUpgrading(false)
+                      }
+                    }}
+                  >
+                    {isUpgrading ? 'Redirecting…' : 'Upgrade Now'}
+                  </button>
+                  <button
+                    className="text-sm font-semibold"
+                    style={{ color: '#2563eb' }}
+                    onClick={() => setAuthOpen(true)}
+                  >
+                    Sign in
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -545,6 +556,7 @@ export default function ChatInput() {
           {/* Footer hint */}
         </div>
       </div>
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </div>
   );
 }

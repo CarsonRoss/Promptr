@@ -112,3 +112,61 @@ export async function cancelSubscription(signal?: AbortSignal): Promise<{ cancel
 }
 
 
+// Auth API helpers
+export async function signup(email: string, password: string, passwordConfirmation?: string, signal?: AbortSignal): Promise<{ created: boolean }> {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/signup`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ email, password, password_confirmation: passwordConfirmation ?? password }),
+    signal,
+  })
+  if (!res.ok) throw new Error(`Signup failed: ${res.status}`)
+  return res.json()
+}
+
+export async function login(email: string, password: string, signal?: AbortSignal): Promise<{ token: string }> {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ email, password }),
+    signal,
+  })
+  if (!res.ok) throw new Error(`Login failed: ${res.status}`)
+  return res.json()
+}
+
+export async function verifyEmailWithCode(
+  email: string,
+  code: string,
+  password?: string,
+  passwordConfirmation?: string,
+  signal?: AbortSignal
+): Promise<{ verified: boolean }> {
+  const payload: any = { email, code }
+  if (password) payload.password = password
+  if (passwordConfirmation) payload.password_confirmation = passwordConfirmation
+  const res = await fetch(`${BASE_URL}/api/v1/auth/verify_email`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+    signal,
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({} as any))
+    const reason = body && body.error ? body.error : `Verify email failed: ${res.status}`
+    throw new Error(String(reason))
+  }
+  return res.json()
+}
+
+export async function resendVerification(email: string, signal?: AbortSignal): Promise<{ sent: boolean }> {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/resend_verification`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ email }),
+    signal,
+  })
+  if (!res.ok) throw new Error(`Resend verification failed: ${res.status}`)
+  return res.json()
+}
+

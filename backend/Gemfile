@@ -58,4 +58,7 @@ group :development, :test do
 
   # Load environment variables from backend/.env in development/test
   gem "dotenv-rails"
+
+  gem 'pry'
+  gem 'pry-byebug' # Optional but useful for stepping through code
 end

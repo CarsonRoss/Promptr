@@ -22,14 +22,13 @@ module Api
         password = params[:password].to_s
         password_confirmation = params[:password_confirmation].presence || password
 
-        user = User.new(email: email, password: password, password_confirmation: password_confirmation, status: 'unpaid')
-        if user.save
-          # Send verification email (link + 6-digit code)
-          EmailVerificationService.send_verification_email(user)
-          render json: { created: true }
-        else
-          render json: { error: 'validation_failed', details: user.errors.full_messages }, status: :unprocessable_entity
+        # Do not persist user yet; issue verification code to email
+        if email.blank? || password.length < 8 || password != password_confirmation
+          return render json: { error: 'validation_failed' }, status: :unprocessable_entity
         end
+        ok = EmailVerificationService.send_code_to_email(email)
+        return render json: { created: true, pending: true } if ok
+        render json: { error: 'email_send_failed' }, status: :service_unavailable
       end
 
       # POST /api/v1/auth/verify_email
@@ -40,14 +39,23 @@ module Api
         if params[:code].present? && params[:email].present?
           code = params[:code].to_s.strip
           email = params[:email].to_s.downcase.strip
-          user = User.find_by(email: email)
-          return render json: { error: 'invalid_code' }, status: :not_found unless user
-          cached = Rails.cache.read(["user:verify_code", user.id].join(':')).to_s
+          cache_key_email = ["email:verify_code", email].join(':')
+          cached = Rails.cache.read(cache_key_email).to_s
+          Rails.logger.info("[Auth#verify_email] email=#{email} provided_code=#{code} cached_code=#{cached}")
           unless cached.present? && code.length == cached.length && ActiveSupport::SecurityUtils.secure_compare(cached, code)
             return render json: { error: 'invalid_code' }, status: :unprocessable_entity
           end
-          user.verify_email!
-          Rails.cache.delete(["user:verify_code", user.id].join(':'))
+          # Create the user now that code is verified
+          pwd = params[:password].to_s
+          pwdc = params[:password_confirmation].presence || pwd
+
+          return render json: { error: 'password_blank' }, status: :unprocessable_entity if pwd.blank?
+          return render json: { error: 'password_too_short' }, status: :unprocessable_entity if pwd.length < 8
+          return render json: { error: 'password_confirmation_mismatch' }, status: :unprocessable_entity if pwd != pwdc
+
+          user = User.create!(email: email, password: pwd, password_confirmation: pwdc, status: 'unpaid')
+          user.verify_email_timestamp!
+          Rails.cache.delete(cache_key_email)
           return render json: { verified: true }
         end
 
@@ -58,7 +66,7 @@ module Api
         return render json: { error: 'invalid_token' }, status: :unprocessable_entity if user_id <= 0
         user = User.find_by(id: user_id)
         return render json: { error: 'invalid_token' }, status: :not_found unless user
-        user.verify_email!
+        user.verify_email_timestamp!
         Rails.cache.delete(["user:verify_token", token].join(':'))
         render json: { verified: true }
       end
