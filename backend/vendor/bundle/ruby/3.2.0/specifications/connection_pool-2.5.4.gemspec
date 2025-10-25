@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "connection_pool".freeze
-  s.version = "2.5.4"
+  s.version = "2.5.4".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "changelog_uri" => "https://github.com/mperham/connection_pool/blob/main/Changes.md", "rubygems_mfa_required" => "true" } if s.respond_to? :metadata=
@@ -15,14 +15,14 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/mperham/connection_pool".freeze
   s.licenses = ["MIT".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 2.5.0".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.6.9".freeze
   s.summary = "Generic connection pool for Ruby".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 4
 
-  s.add_development_dependency(%q<bundler>.freeze, [">= 0"])
-  s.add_development_dependency(%q<minitest>.freeze, [">= 5.0.0"])
-  s.add_development_dependency(%q<rake>.freeze, [">= 0"])
+  s.add_development_dependency(%q<bundler>.freeze, [">= 0".freeze])
+  s.add_development_dependency(%q<minitest>.freeze, [">= 5.0.0".freeze])
+  s.add_development_dependency(%q<rake>.freeze, [">= 0".freeze])
 end

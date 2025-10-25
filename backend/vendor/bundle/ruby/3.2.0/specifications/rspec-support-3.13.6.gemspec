@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "rspec-support".freeze
-  s.version = "3.13.6"
+  s.version = "3.13.6".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "bug_tracker_uri" => "https://github.com/rspec/rspec/issues", "changelog_uri" => "https://github.com/rspec/rspec/blob/rspec-support-v3.13.6/rspec-support/Changelog.md", "documentation_uri" => "https://rspec.info/documentation/", "mailing_list_uri" => "https://groups.google.com/forum/#!forum/rspec", "rubygems_mfa_required" => "true", "source_code_uri" => "https://github.com/rspec/rspec/blob/rspec-support-v3.13.6/rspec-support" } if s.respond_to? :metadata=
@@ -17,13 +17,13 @@ Gem::Specification.new do |s|
   s.licenses = ["MIT".freeze]
   s.rdoc_options = ["--charset=UTF-8".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 1.8.7".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.6.7".freeze
   s.summary = "rspec-support-3.13.6".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 4
 
-  s.add_development_dependency(%q<rake>.freeze, ["> 10.0.0"])
-  s.add_development_dependency(%q<thread_order>.freeze, ["~> 1.1.0"])
+  s.add_development_dependency(%q<rake>.freeze, ["> 10.0.0".freeze])
+  s.add_development_dependency(%q<thread_order>.freeze, ["~> 1.1.0".freeze])
 end

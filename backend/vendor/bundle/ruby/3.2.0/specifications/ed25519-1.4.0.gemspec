@@ -4,7 +4,7 @@
 
 Gem::Specification.new do |s|
   s.name = "ed25519".freeze
-  s.version = "1.4.0"
+  s.version = "1.4.0".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
@@ -19,12 +19,12 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/RubyCrypto/ed25519".freeze
   s.licenses = ["MIT".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 3.0".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.5.16".freeze
   s.summary = "An efficient digital signature library providing the Ed25519 algorithm".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 4
 
-  s.add_development_dependency(%q<bundler>.freeze, [">= 0"])
+  s.add_development_dependency(%q<bundler>.freeze, [">= 0".freeze])
 end

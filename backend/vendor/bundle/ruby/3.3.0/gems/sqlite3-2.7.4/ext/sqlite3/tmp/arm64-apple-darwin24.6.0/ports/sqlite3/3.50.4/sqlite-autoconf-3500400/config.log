@@ -1,0 +1,90 @@
+Invoked as: ./configure --host=arm64-apple-darwin24.6.0 --enable-static --disable-shared --disable-shared --enable-static --enable-fts5 LDFLAGS=-L/opt/homebrew/opt/libressl/lib CPPFLAGS=-I/opt/homebrew/opt/libressl/include CC=clang "CFLAGS=-fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -DSQLITE_ENABLE_DBPAGE_VTAB=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1" --prefix=/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ports/arm64-apple-darwin24.6.0/sqlite3/3.50.4
+Tclsh: /usr/bin/tclsh
+Failed: clang -c -g0 -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -I/opt/homebrew/opt/libressl/include conftest__.c -o conftest__.o
+conftest__.c:3:15: error: '_x' declared as an array with a negative size
+    3 | static int _x[sizeof(off_t) == 4 ? 1 : -1] = { 1 };
+      |               ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.
+child process exited abnormally
+============
+The failed code was:
+#include <sys/types.h>
+int main(void) {
+static int _x[sizeof(off_t) == 4 ? 1 : -1] = { 1 };
+return 0;
+}
+============
+Failed: clang -L/opt/homebrew/opt/libressl/lib -g0 -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 conftest__.c -o conftest__
+Undefined symbols for architecture arm64:
+  "_localtime_s", referenced from:
+      _main in conftest__-5919e3.o
+ld: symbol(s) not found for architecture arm64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+child process exited abnormally
+============
+The failed code was:
+extern void localtime_s(void);
+int main(void) {
+localtime_s();
+return 0;
+}
+============
+Failed: clang -L/opt/homebrew/opt/libressl/lib -g0 -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 conftest__.c -o conftest__
+Undefined symbols for architecture arm64:
+  "_pread64", referenced from:
+      _main in conftest__-deb982.o
+ld: symbol(s) not found for architecture arm64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+child process exited abnormally
+============
+The failed code was:
+extern void pread64(void);
+int main(void) {
+pread64();
+return 0;
+}
+============
+Failed: clang -L/opt/homebrew/opt/libressl/lib -g0 -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 conftest__.c -o conftest__
+Undefined symbols for architecture arm64:
+  "_pwrite64", referenced from:
+      _main in conftest__-bded06.o
+ld: symbol(s) not found for architecture arm64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+child process exited abnormally
+============
+The failed code was:
+extern void pwrite64(void);
+int main(void) {
+pwrite64();
+return 0;
+}
+============
+Failed: clang -c -g0 -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -I/opt/homebrew/opt/libressl/include conftest__.c -o conftest__.o
+conftest__.c:1:10: fatal error: 'malloc.h' file not found
+    1 | #include <malloc.h>
+      |          ^~~~~~~~~~
+1 error generated.
+child process exited abnormally
+============
+The failed code was:
+#include <malloc.h>
+int main(void) {
+
+return 0;
+}
+============
+Failed: clang -L/opt/homebrew/opt/libressl/lib -g0 -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 conftest__.c -o conftest__
+Undefined symbols for architecture arm64:
+  "_deflate", referenced from:
+      _main in conftest__-e70009.o
+ld: symbol(s) not found for architecture arm64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+child process exited abnormally
+============
+The failed code was:
+extern void deflate(void);
+int main(void) {
+deflate();
+return 0;
+}
+============

@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "net-ssh".freeze
-  s.version = "7.3.0"
+  s.version = "7.3.0".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "changelog_uri" => "https://github.com/net-ssh/net-ssh/blob/master/CHANGES.txt" } if s.respond_to? :metadata=
@@ -19,21 +19,21 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/net-ssh/net-ssh".freeze
   s.licenses = ["MIT".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 2.6".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.3.3".freeze
   s.summary = "Net::SSH: a pure-Ruby implementation of the SSH2 client protocol.".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 4
 
-  s.add_development_dependency(%q<bcrypt_pbkdf>.freeze, ["~> 1.0"])
-  s.add_development_dependency(%q<ed25519>.freeze, ["~> 1.2"])
-  s.add_development_dependency(%q<x25519>.freeze, [">= 0"])
-  s.add_development_dependency(%q<rbnacl>.freeze, ["~> 7.1"])
-  s.add_development_dependency(%q<base64>.freeze, [">= 0"])
-  s.add_development_dependency(%q<bundler>.freeze, [">= 1.17"])
-  s.add_development_dependency(%q<minitest>.freeze, ["~> 5.19"])
-  s.add_development_dependency(%q<mocha>.freeze, ["~> 2.1.0"])
-  s.add_development_dependency(%q<rake>.freeze, ["~> 12.0"])
-  s.add_development_dependency(%q<rubocop>.freeze, ["~> 1.28.0"])
+  s.add_development_dependency(%q<bcrypt_pbkdf>.freeze, ["~> 1.0".freeze])
+  s.add_development_dependency(%q<ed25519>.freeze, ["~> 1.2".freeze])
+  s.add_development_dependency(%q<x25519>.freeze, [">= 0".freeze])
+  s.add_development_dependency(%q<rbnacl>.freeze, ["~> 7.1".freeze])
+  s.add_development_dependency(%q<base64>.freeze, [">= 0".freeze])
+  s.add_development_dependency(%q<bundler>.freeze, [">= 1.17".freeze])
+  s.add_development_dependency(%q<minitest>.freeze, ["~> 5.19".freeze])
+  s.add_development_dependency(%q<mocha>.freeze, ["~> 2.1.0".freeze])
+  s.add_development_dependency(%q<rake>.freeze, ["~> 12.0".freeze])
+  s.add_development_dependency(%q<rubocop>.freeze, ["~> 1.28.0".freeze])
 end

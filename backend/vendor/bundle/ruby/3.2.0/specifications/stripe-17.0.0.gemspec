@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "stripe".freeze
-  s.version = "17.0.0"
+  s.version = "17.0.0".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "bug_tracker_uri" => "https://github.com/stripe/stripe-ruby/issues", "changelog_uri" => "https://github.com/stripe/stripe-ruby/blob/master/CHANGELOG.md", "documentation_uri" => "https://stripe.com/docs/api?lang=ruby", "github_repo" => "ssh://github.com/stripe/stripe-ruby", "homepage_uri" => "https://stripe.com/docs/api?lang=ruby", "rubygems_mfa_required" => "false", "source_code_uri" => "https://github.com/stripe/stripe-ruby" } if s.respond_to? :metadata=
@@ -18,8 +18,8 @@ Gem::Specification.new do |s|
   s.homepage = "https://stripe.com/docs/api?lang=ruby".freeze
   s.licenses = ["MIT".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 2.6.0".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.3.27".freeze
   s.summary = "Ruby bindings for the Stripe API".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 end

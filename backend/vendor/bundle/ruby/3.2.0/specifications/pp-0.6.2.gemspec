@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "pp".freeze
-  s.version = "0.6.2"
+  s.version = "0.6.2".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "homepage_uri" => "https://github.com/ruby/pp", "source_code_uri" => "https://github.com/ruby/pp" } if s.respond_to? :metadata=
@@ -16,12 +16,12 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/ruby/pp".freeze
   s.licenses = ["Ruby".freeze, "BSD-2-Clause".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 2.7.0".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.5.11".freeze
   s.summary = "Provides a PrettyPrinter for Ruby objects".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 4
 
-  s.add_runtime_dependency(%q<prettyprint>.freeze, [">= 0"])
+  s.add_runtime_dependency(%q<prettyprint>.freeze, [">= 0".freeze])
 end

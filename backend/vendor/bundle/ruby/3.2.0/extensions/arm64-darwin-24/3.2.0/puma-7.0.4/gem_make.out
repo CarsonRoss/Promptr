@@ -25,10 +25,10 @@ checking for SSL_get1_peer_certificate() in openssl/ssl.h... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/puma-7.0.4/ext/puma_http11
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-95zbwn sitelibdir\=./.gem.20251025-79208-95zbwn clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-v9l6c5 sitelibdir\=./.gem.20251025-24070-v9l6c5 clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/puma-7.0.4/ext/puma_http11
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-95zbwn sitelibdir\=./.gem.20251025-79208-95zbwn
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-v9l6c5 sitelibdir\=./.gem.20251025-24070-v9l6c5
 compiling http11_parser.c
 compiling mini_ssl.c
 compiling puma_http11.c
@@ -36,8 +36,8 @@ linking shared-object puma/puma_http11.bundle
 ld: warning: ignoring duplicate libraries: '-lruby.3.2'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/puma-7.0.4/ext/puma_http11
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-95zbwn sitelibdir\=./.gem.20251025-79208-95zbwn install
-/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 puma_http11.bundle ./.gem.20251025-79208-95zbwn/puma
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-v9l6c5 sitelibdir\=./.gem.20251025-24070-v9l6c5 install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 puma_http11.bundle ./.gem.20251025-24070-v9l6c5/puma
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/puma-7.0.4/ext/puma_http11
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-95zbwn sitelibdir\=./.gem.20251025-79208-95zbwn clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-v9l6c5 sitelibdir\=./.gem.20251025-24070-v9l6c5 clean

@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "unicode-emoji".freeze
-  s.version = "4.1.0"
+  s.version = "4.1.0".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "rubygems_mfa_required" => "true" } if s.respond_to? :metadata=
@@ -15,8 +15,8 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/janlelis/unicode-emoji".freeze
   s.licenses = ["MIT".freeze]
   s.required_ruby_version = Gem::Requirement.new([">= 2.5".freeze, "< 4.0".freeze])
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.5.21".freeze
   s.summary = "Emoji data and regex".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 end

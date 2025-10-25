@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "tsort".freeze
-  s.version = "0.2.0"
+  s.version = "0.2.0".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "homepage_uri" => "https://github.com/ruby/tsort", "source_code_uri" => "https://github.com/ruby/tsort" } if s.respond_to? :metadata=
@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/ruby/tsort".freeze
   s.licenses = ["Ruby".freeze, "BSD-2-Clause".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 2.3.0".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.5.0.dev".freeze
   s.summary = "Topological sorting using Tarjan's algorithm".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 end

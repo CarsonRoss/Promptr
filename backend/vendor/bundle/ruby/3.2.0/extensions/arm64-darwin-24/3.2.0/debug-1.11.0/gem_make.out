@@ -3,18 +3,18 @@ current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/debug-1.11.0/ext/debug
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-mj7v6w sitelibdir\=./.gem.20251025-79208-mj7v6w clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-2wj6mx sitelibdir\=./.gem.20251025-24070-2wj6mx clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/debug-1.11.0/ext/debug
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-mj7v6w sitelibdir\=./.gem.20251025-79208-mj7v6w
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-2wj6mx sitelibdir\=./.gem.20251025-24070-2wj6mx
 compiling debug.c
 compiling iseq_collector.c
 linking shared-object debug/debug.bundle
 ld: warning: ignoring duplicate libraries: '-lruby.3.2'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/debug-1.11.0/ext/debug
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-mj7v6w sitelibdir\=./.gem.20251025-79208-mj7v6w install
-/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 debug.bundle ./.gem.20251025-79208-mj7v6w/debug
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-2wj6mx sitelibdir\=./.gem.20251025-24070-2wj6mx install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 debug.bundle ./.gem.20251025-24070-2wj6mx/debug
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/debug-1.11.0/ext/debug
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-mj7v6w sitelibdir\=./.gem.20251025-79208-mj7v6w clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-2wj6mx sitelibdir\=./.gem.20251025-24070-2wj6mx clean

@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "ruby_http_client".freeze
-  s.version = "3.5.5"
+  s.version = "3.5.5".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
@@ -13,15 +13,15 @@ Gem::Specification.new do |s|
   s.email = "help@twilio.com".freeze
   s.homepage = "http://github.com/sendgrid/ruby-http-client".freeze
   s.licenses = ["MIT".freeze]
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.3.7".freeze
   s.summary = "A simple REST client".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 4
 
-  s.add_development_dependency(%q<codecov>.freeze, [">= 0"])
-  s.add_development_dependency(%q<minitest>.freeze, [">= 0"])
-  s.add_development_dependency(%q<rake>.freeze, [">= 0"])
-  s.add_development_dependency(%q<simplecov>.freeze, ["~> 0.18.5"])
+  s.add_development_dependency(%q<codecov>.freeze, [">= 0".freeze])
+  s.add_development_dependency(%q<minitest>.freeze, [">= 0".freeze])
+  s.add_development_dependency(%q<rake>.freeze, [">= 0".freeze])
+  s.add_development_dependency(%q<simplecov>.freeze, ["~> 0.18.5".freeze])
 end

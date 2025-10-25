@@ -6,10 +6,10 @@ checking for whether -fvisibility=hidden is accepted as CFLAGS... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-x6km54 sitelibdir\=./.gem.20251025-79208-x6km54 clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-8qcog9 sitelibdir\=./.gem.20251025-24070-8qcog9 clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-x6km54 sitelibdir\=./.gem.20251025-79208-x6km54
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-8qcog9 sitelibdir\=./.gem.20251025-24070-8qcog9
 compiling api_node.c
 compiling api_pack.c
 compiling extension.c
@@ -38,8 +38,8 @@ linking shared-object prism/prism.bundle
 ld: warning: ignoring duplicate libraries: '-lruby.3.2'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-x6km54 sitelibdir\=./.gem.20251025-79208-x6km54 install
-/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 prism.bundle ./.gem.20251025-79208-x6km54/prism
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-8qcog9 sitelibdir\=./.gem.20251025-24070-8qcog9 install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 prism.bundle ./.gem.20251025-24070-8qcog9/prism
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-x6km54 sitelibdir\=./.gem.20251025-79208-x6km54 clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-8qcog9 sitelibdir\=./.gem.20251025-24070-8qcog9 clean

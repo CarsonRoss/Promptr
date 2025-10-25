@@ -1,0 +1,19 @@
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/erb-5.0.2/ext/erb/escape
+/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+checking for rb_ext_ractor_safe() in ruby.h... yes
+creating Makefile
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/erb-5.0.2/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-n3i3x0 sitelibdir\=./.gem.20251025-30080-n3i3x0 clean
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/erb-5.0.2/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-n3i3x0 sitelibdir\=./.gem.20251025-30080-n3i3x0
+compiling escape.c
+linking shared-object erb/escape.bundle
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/erb-5.0.2/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-n3i3x0 sitelibdir\=./.gem.20251025-30080-n3i3x0 install
+/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 escape.bundle ./.gem.20251025-30080-n3i3x0/erb
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/erb-5.0.2/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-n3i3x0 sitelibdir\=./.gem.20251025-30080-n3i3x0 clean

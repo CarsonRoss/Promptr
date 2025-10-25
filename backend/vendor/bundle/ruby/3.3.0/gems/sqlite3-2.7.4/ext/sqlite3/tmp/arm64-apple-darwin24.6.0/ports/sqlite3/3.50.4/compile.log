@@ -1,0 +1,8 @@
+clang -c /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3/tmp/arm64-apple-darwin24.6.0/ports/sqlite3/3.50.4/sqlite-autoconf-3500400/sqlite3.c -o sqlite3.o -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -I/opt/homebrew/opt/libressl/include -I. -dynamic  -DSQLITE_ENABLE_DBPAGE_VTAB=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_MATH_FUNCTIONS -DSQLITE_THREADSAFE=1
+ar cr libsqlite3.a sqlite3.o
+clang -o sqlite3 \
+	/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3/tmp/arm64-apple-darwin24.6.0/ports/sqlite3/3.50.4/sqlite-autoconf-3500400/shell.c /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3/tmp/arm64-apple-darwin24.6.0/ports/sqlite3/3.50.4/sqlite-autoconf-3500400/sqlite3.c -rpath /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ports/arm64-apple-darwin24.6.0/sqlite3/3.50.4/lib    -lz   -L/opt/homebrew/opt/libressl/lib \
+	 \
+	-I. -DSQLITE_ENABLE_DBPAGE_VTAB=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_MATH_FUNCTIONS -DSQLITE_THREADSAFE=1 -DSQLITE_HAVE_ZLIB=1 \
+	-fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -I/opt/homebrew/opt/libressl/include   \
+	-L/opt/homebrew/opt/libressl/lib 

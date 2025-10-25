@@ -7,17 +7,17 @@ checking for whether -std=c99 is accepted as CFLAGS... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/bootsnap-1.18.6/ext/bootsnap
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-f4eoe0 sitelibdir\=./.gem.20251025-79208-f4eoe0 clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-r039hw sitelibdir\=./.gem.20251025-24070-r039hw clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/bootsnap-1.18.6/ext/bootsnap
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-f4eoe0 sitelibdir\=./.gem.20251025-79208-f4eoe0
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-r039hw sitelibdir\=./.gem.20251025-24070-r039hw
 compiling bootsnap.c
 linking shared-object bootsnap/bootsnap.bundle
 ld: warning: ignoring duplicate libraries: '-lruby.3.2'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/bootsnap-1.18.6/ext/bootsnap
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-f4eoe0 sitelibdir\=./.gem.20251025-79208-f4eoe0 install
-/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 bootsnap.bundle ./.gem.20251025-79208-f4eoe0/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-r039hw sitelibdir\=./.gem.20251025-24070-r039hw install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 bootsnap.bundle ./.gem.20251025-24070-r039hw/bootsnap
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/bootsnap-1.18.6/ext/bootsnap
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-f4eoe0 sitelibdir\=./.gem.20251025-79208-f4eoe0 clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-r039hw sitelibdir\=./.gem.20251025-24070-r039hw clean

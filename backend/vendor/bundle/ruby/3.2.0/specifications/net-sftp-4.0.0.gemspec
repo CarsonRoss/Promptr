@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "net-sftp".freeze
-  s.version = "4.0.0"
+  s.version = "4.0.0".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
@@ -17,14 +17,14 @@ Gem::Specification.new do |s|
   s.files = ["LICENSE.txt".freeze, "README.rdoc".freeze]
   s.homepage = "https://github.com/net-ssh/net-sftp".freeze
   s.licenses = ["MIT".freeze]
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.1.6".freeze
   s.summary = "A pure Ruby implementation of the SFTP client protocol.".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 3
 
-  s.add_runtime_dependency(%q<net-ssh>.freeze, [">= 5.0.0", "< 8.0.0"])
-  s.add_development_dependency(%q<minitest>.freeze, [">= 5"])
-  s.add_development_dependency(%q<mocha>.freeze, [">= 0"])
+  s.add_runtime_dependency(%q<net-ssh>.freeze, [">= 5.0.0".freeze, "< 8.0.0".freeze])
+  s.add_development_dependency(%q<minitest>.freeze, [">= 5".freeze])
+  s.add_development_dependency(%q<mocha>.freeze, [">= 0".freeze])
 end

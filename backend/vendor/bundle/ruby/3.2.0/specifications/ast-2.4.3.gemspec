@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "ast".freeze
-  s.version = "2.4.3"
+  s.version = "2.4.3".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
@@ -13,17 +13,17 @@ Gem::Specification.new do |s|
   s.email = ["whitequark@whitequark.org".freeze]
   s.homepage = "https://whitequark.github.io/ast/".freeze
   s.licenses = ["MIT".freeze]
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.6.2".freeze
   s.summary = "A library for working with Abstract Syntax Trees.".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 4
 
-  s.add_development_dependency(%q<rake>.freeze, ["~> 13.2"])
-  s.add_development_dependency(%q<rspec>.freeze, ["~> 3.13"])
-  s.add_development_dependency(%q<simplecov>.freeze, [">= 0"])
-  s.add_development_dependency(%q<coveralls>.freeze, ["~> 0.8.23"])
-  s.add_development_dependency(%q<yard>.freeze, [">= 0"])
-  s.add_development_dependency(%q<kramdown>.freeze, [">= 0"])
+  s.add_development_dependency(%q<rake>.freeze, ["~> 13.2".freeze])
+  s.add_development_dependency(%q<rspec>.freeze, ["~> 3.13".freeze])
+  s.add_development_dependency(%q<simplecov>.freeze, [">= 0".freeze])
+  s.add_development_dependency(%q<coveralls>.freeze, ["~> 0.8.23".freeze])
+  s.add_development_dependency(%q<yard>.freeze, [">= 0".freeze])
+  s.add_development_dependency(%q<kramdown>.freeze, [">= 0".freeze])
 end

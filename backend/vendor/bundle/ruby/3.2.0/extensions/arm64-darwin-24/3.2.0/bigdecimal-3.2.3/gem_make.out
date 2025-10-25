@@ -20,18 +20,18 @@ checking for RB_WARN_CATEGORY_DEPRECATED in ruby.h... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-b5l6nh sitelibdir\=./.gem.20251025-79208-b5l6nh clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-e1aq00 sitelibdir\=./.gem.20251025-24070-e1aq00 clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-b5l6nh sitelibdir\=./.gem.20251025-79208-b5l6nh
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-e1aq00 sitelibdir\=./.gem.20251025-24070-e1aq00
 compiling bigdecimal.c
 compiling missing.c
 linking shared-object bigdecimal.bundle
 ld: warning: ignoring duplicate libraries: '-lruby.3.2'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-b5l6nh sitelibdir\=./.gem.20251025-79208-b5l6nh install
-/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 bigdecimal.bundle ./.gem.20251025-79208-b5l6nh
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-e1aq00 sitelibdir\=./.gem.20251025-24070-e1aq00 install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 bigdecimal.bundle ./.gem.20251025-24070-e1aq00
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-b5l6nh sitelibdir\=./.gem.20251025-79208-b5l6nh clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-e1aq00 sitelibdir\=./.gem.20251025-24070-e1aq00 clean

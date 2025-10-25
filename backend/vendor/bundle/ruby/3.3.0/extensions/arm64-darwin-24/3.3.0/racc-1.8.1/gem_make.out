@@ -1,0 +1,18 @@
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-iuk5ch sitelibdir\=./.gem.20251025-30080-iuk5ch clean
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-iuk5ch sitelibdir\=./.gem.20251025-30080-iuk5ch
+compiling cparse.c
+linking shared-object racc/cparse.bundle
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-iuk5ch sitelibdir\=./.gem.20251025-30080-iuk5ch install
+/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 cparse.bundle ./.gem.20251025-30080-iuk5ch/racc
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-iuk5ch sitelibdir\=./.gem.20251025-30080-iuk5ch clean

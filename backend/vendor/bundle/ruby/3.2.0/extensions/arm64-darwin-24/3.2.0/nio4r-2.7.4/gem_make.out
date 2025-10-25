@@ -14,10 +14,10 @@ checking for sys/resource.h... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/nio4r-2.7.4/ext/nio4r
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-gzkg8g sitelibdir\=./.gem.20251025-79208-gzkg8g clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-vfmgkx sitelibdir\=./.gem.20251025-24070-vfmgkx clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/nio4r-2.7.4/ext/nio4r
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-gzkg8g sitelibdir\=./.gem.20251025-79208-gzkg8g
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-vfmgkx sitelibdir\=./.gem.20251025-24070-vfmgkx
 compiling bytebuffer.c
 compiling monitor.c
 compiling nio4r_ext.c
@@ -361,8 +361,8 @@ linking shared-object nio4r_ext.bundle
 ld: warning: ignoring duplicate libraries: '-lruby.3.2'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/nio4r-2.7.4/ext/nio4r
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-gzkg8g sitelibdir\=./.gem.20251025-79208-gzkg8g install
-/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 nio4r_ext.bundle ./.gem.20251025-79208-gzkg8g
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-vfmgkx sitelibdir\=./.gem.20251025-24070-vfmgkx install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 nio4r_ext.bundle ./.gem.20251025-24070-vfmgkx
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/nio4r-2.7.4/ext/nio4r
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-gzkg8g sitelibdir\=./.gem.20251025-79208-gzkg8g clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-vfmgkx sitelibdir\=./.gem.20251025-24070-vfmgkx clean

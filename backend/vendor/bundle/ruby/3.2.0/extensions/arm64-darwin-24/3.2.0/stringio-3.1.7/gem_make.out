@@ -4,17 +4,17 @@ checking for rb_io_mode_t in ruby/io.h... no
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/stringio-3.1.7/ext/stringio
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-6lu2l5 sitelibdir\=./.gem.20251025-79208-6lu2l5 clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-jjzqth sitelibdir\=./.gem.20251025-24070-jjzqth clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/stringio-3.1.7/ext/stringio
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-6lu2l5 sitelibdir\=./.gem.20251025-79208-6lu2l5
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-jjzqth sitelibdir\=./.gem.20251025-24070-jjzqth
 compiling stringio.c
 linking shared-object stringio.bundle
 ld: warning: ignoring duplicate libraries: '-lruby.3.2'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/stringio-3.1.7/ext/stringio
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-6lu2l5 sitelibdir\=./.gem.20251025-79208-6lu2l5 install
-/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 stringio.bundle ./.gem.20251025-79208-6lu2l5
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-jjzqth sitelibdir\=./.gem.20251025-24070-jjzqth install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 stringio.bundle ./.gem.20251025-24070-jjzqth
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/stringio-3.1.7/ext/stringio
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-6lu2l5 sitelibdir\=./.gem.20251025-79208-6lu2l5 clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-jjzqth sitelibdir\=./.gem.20251025-24070-jjzqth clean

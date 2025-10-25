@@ -1,0 +1,32 @@
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/psych-5.2.6/ext/psych
+/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+checking for pkg-config for yaml-0.1... ["-I/opt/homebrew/Cellar/libyaml/0.2.5/include ", "-L/opt/homebrew/Cellar/libyaml/0.2.5/lib", "-lyaml"]
+checking for yaml.h... yes
+checking for yaml_get_version() in -lyaml... yes
+creating Makefile
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/psych-5.2.6/ext/psych
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-at3xap sitelibdir\=./.gem.20251025-30080-at3xap clean
+cd libyaml && make clean
+/bin/sh: line 0: cd: libyaml: No such file or directory
+make: [Makefile:284: clean-so] Error 1 (ignored)
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/psych-5.2.6/ext/psych
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-at3xap sitelibdir\=./.gem.20251025-30080-at3xap
+compiling psych.c
+compiling psych_emitter.c
+compiling psych_parser.c
+compiling psych_to_ruby.c
+compiling psych_yaml_tree.c
+linking shared-object psych.bundle
+ld: warning: ignoring duplicate libraries: '-lyaml'
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/psych-5.2.6/ext/psych
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-at3xap sitelibdir\=./.gem.20251025-30080-at3xap install
+/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 psych.bundle ./.gem.20251025-30080-at3xap
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/psych-5.2.6/ext/psych
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-at3xap sitelibdir\=./.gem.20251025-30080-at3xap clean
+cd libyaml && make clean
+/bin/sh: line 0: cd: libyaml: No such file or directory
+make: [Makefile:284: clean-so] Error 1 (ignored)

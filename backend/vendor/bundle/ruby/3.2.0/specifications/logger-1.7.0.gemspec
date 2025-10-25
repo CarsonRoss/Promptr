@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "logger".freeze
-  s.version = "1.7.0"
+  s.version = "1.7.0".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "changelog_uri" => "https://github.com/ruby/logger/releases" } if s.respond_to? :metadata=
@@ -15,8 +15,8 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/ruby/logger".freeze
   s.licenses = ["Ruby".freeze, "BSD-2-Clause".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 2.5.0".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.5.11".freeze
   s.summary = "Provides a simple logging utility for outputting messages.".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 end

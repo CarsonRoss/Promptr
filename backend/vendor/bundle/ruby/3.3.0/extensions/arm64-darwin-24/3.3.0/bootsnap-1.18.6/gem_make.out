@@ -1,0 +1,22 @@
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.18.6/ext/bootsnap
+/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+checking for fdatasync() in unistd.h... yes
+checking for whether -D_GNU_SOURCE is accepted as CPPFLAGS... yes
+checking for whether -O3 is accepted as CFLAGS... yes
+checking for whether -std=c99 is accepted as CFLAGS... yes
+creating Makefile
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.18.6/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-kh7f2b sitelibdir\=./.gem.20251025-30080-kh7f2b clean
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.18.6/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-kh7f2b sitelibdir\=./.gem.20251025-30080-kh7f2b
+compiling bootsnap.c
+linking shared-object bootsnap/bootsnap.bundle
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.18.6/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-kh7f2b sitelibdir\=./.gem.20251025-30080-kh7f2b install
+/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 bootsnap.bundle ./.gem.20251025-30080-kh7f2b/bootsnap
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bootsnap-1.18.6/ext/bootsnap
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-kh7f2b sitelibdir\=./.gem.20251025-30080-kh7f2b clean

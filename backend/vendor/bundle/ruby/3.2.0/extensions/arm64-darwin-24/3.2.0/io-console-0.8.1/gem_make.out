@@ -16,17 +16,17 @@ checking for ttyname_r()... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/io-console-0.8.1/ext/io/console
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-ext0re sitelibdir\=./.gem.20251025-79208-ext0re clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-n7cc2i sitelibdir\=./.gem.20251025-24070-n7cc2i clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/io-console-0.8.1/ext/io/console
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-ext0re sitelibdir\=./.gem.20251025-79208-ext0re
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-n7cc2i sitelibdir\=./.gem.20251025-24070-n7cc2i
 compiling console.c
 linking shared-object io/console.bundle
 ld: warning: ignoring duplicate libraries: '-lruby.3.2'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/io-console-0.8.1/ext/io/console
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-ext0re sitelibdir\=./.gem.20251025-79208-ext0re install
-/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 console.bundle ./.gem.20251025-79208-ext0re/io
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-n7cc2i sitelibdir\=./.gem.20251025-24070-n7cc2i install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 console.bundle ./.gem.20251025-24070-n7cc2i/io
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/io-console-0.8.1/ext/io/console
-make DESTDIR\= sitearchdir\=./.gem.20251025-79208-ext0re sitelibdir\=./.gem.20251025-79208-ext0re clean
+make DESTDIR\= sitearchdir\=./.gem.20251025-24070-n7cc2i sitelibdir\=./.gem.20251025-24070-n7cc2i clean

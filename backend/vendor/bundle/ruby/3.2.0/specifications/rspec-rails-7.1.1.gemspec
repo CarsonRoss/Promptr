@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name = "rspec-rails".freeze
-  s.version = "7.1.1"
+  s.version = "7.1.1".freeze
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.metadata = { "bug_tracker_uri" => "https://github.com/rspec/rspec-rails/issues", "changelog_uri" => "https://github.com/rspec/rspec-rails/blob/v7.1.1/Changelog.md", "documentation_uri" => "https://rspec.info/documentation/", "mailing_list_uri" => "https://groups.google.com/forum/#!forum/rspec", "source_code_uri" => "https://github.com/rspec/rspec-rails" } if s.respond_to? :metadata=
@@ -17,21 +17,21 @@ Gem::Specification.new do |s|
   s.licenses = ["MIT".freeze]
   s.rdoc_options = ["--charset=UTF-8".freeze]
   s.required_ruby_version = Gem::Requirement.new(">= 2.7.0".freeze)
-  s.rubygems_version = "3.4.19".freeze
+  s.rubygems_version = "3.6.2".freeze
   s.summary = "RSpec for Rails".freeze
 
-  s.installed_by_version = "3.4.19" if s.respond_to? :installed_by_version
+  s.installed_by_version = "3.7.2".freeze
 
   s.specification_version = 4
 
-  s.add_runtime_dependency(%q<actionpack>.freeze, [">= 7.0"])
-  s.add_runtime_dependency(%q<activesupport>.freeze, [">= 7.0"])
-  s.add_runtime_dependency(%q<railties>.freeze, [">= 7.0"])
-  s.add_runtime_dependency(%q<rspec-core>.freeze, ["~> 3.13"])
-  s.add_runtime_dependency(%q<rspec-expectations>.freeze, ["~> 3.13"])
-  s.add_runtime_dependency(%q<rspec-mocks>.freeze, ["~> 3.13"])
-  s.add_runtime_dependency(%q<rspec-support>.freeze, ["~> 3.13"])
-  s.add_development_dependency(%q<ammeter>.freeze, ["~> 1.1.5"])
-  s.add_development_dependency(%q<aruba>.freeze, ["~> 0.14.12"])
-  s.add_development_dependency(%q<cucumber>.freeze, ["> 7.0"])
+  s.add_runtime_dependency(%q<actionpack>.freeze, [">= 7.0".freeze])
+  s.add_runtime_dependency(%q<activesupport>.freeze, [">= 7.0".freeze])
+  s.add_runtime_dependency(%q<railties>.freeze, [">= 7.0".freeze])
+  s.add_runtime_dependency(%q<rspec-core>.freeze, ["~> 3.13".freeze])
+  s.add_runtime_dependency(%q<rspec-expectations>.freeze, ["~> 3.13".freeze])
+  s.add_runtime_dependency(%q<rspec-mocks>.freeze, ["~> 3.13".freeze])
+  s.add_runtime_dependency(%q<rspec-support>.freeze, ["~> 3.13".freeze])
+  s.add_development_dependency(%q<ammeter>.freeze, ["~> 1.1.5".freeze])
+  s.add_development_dependency(%q<aruba>.freeze, ["~> 0.14.12".freeze])
+  s.add_development_dependency(%q<cucumber>.freeze, ["> 7.0".freeze])
 end

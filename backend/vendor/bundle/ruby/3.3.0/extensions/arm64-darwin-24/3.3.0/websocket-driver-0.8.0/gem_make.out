@@ -1,0 +1,18 @@
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-xj5yih sitelibdir\=./.gem.20251025-30080-xj5yih clean
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-xj5yih sitelibdir\=./.gem.20251025-30080-xj5yih
+compiling websocket_mask.c
+linking shared-object websocket_mask.bundle
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-xj5yih sitelibdir\=./.gem.20251025-30080-xj5yih install
+/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 websocket_mask.bundle ./.gem.20251025-30080-xj5yih
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20251025-30080-xj5yih sitelibdir\=./.gem.20251025-30080-xj5yih clean
