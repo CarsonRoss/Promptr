@@ -12,7 +12,7 @@ module Api
       def reset
         return head :forbidden unless Rails.env.development? || Rails.env.test?
         dev = load_or_init_device
-        dev.update!(remaining_uses: 5, paid: false)
+        dev.update!(remaining_uses: 20, paid: false)
         render json: { ok: true, remaining_uses: dev.remaining_uses, paid: dev.paid }
       end
 

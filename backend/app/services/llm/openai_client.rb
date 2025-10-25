@@ -22,12 +22,40 @@ module Llm
       # Build a strict JSON-only instruction
       system_prompt = <<~PROMPT
         You are a prompt quality evaluator. Rate the user's prompt from 0-100 based on:
-        - Clarity: Is the request clear and unambiguous?
-        - Completeness: Does it provide necessary details to accomplish what it is asking for?
-        - Feasibility: Can this be reasonably accomplished?
-        - Specificity: Are requirements well-defined?
-        - Rubustness: If the prompt asks for code, look for potential edge cases and errors that the user should consider.
-        - Context: Does the prompt use too much context? Not enough context?
+        - Clarity: The evaluator should verify that the user’s prompt has no ambiguity. Clarity means the instructions are straightforward and leave “no room for ambiguity”. 
+        Specificity means the prompt narrows in on exactly what is needed (e.g. naming exact tasks or concepts). For instance, the Ministry of Testing example shows that adding specific aspects (e.g. “patient privacy, equity, accountability”) made the prompt stronger. 
+        Thus, the rubric should include questions like “Is the request stated clearly?” and “Does it specify exactly what to do?” (reflecting metrics like clarity and specificity.
+        
+        - Completeness: A strong prompt provides necessary background context without overwhelming detail. The evaluator should check if the prompt includes relevant context but avoids irrelevant information. Research suggests explicitly incorporating context (e.g. project details, system information) can improve alignment.
+        For code tasks, this means specifying the programming language, frameworks, or any input data. The evaluator should penalize prompts that omit critical information (making the task impossible or prone to hallucination) or include too much unrelated detail. For example, prompt-engineering advice recommends a template of “Context/Background” as a key element. 
+        The rubric could ask: “Does the prompt include all necessary context (language, tools, data) and avoid irrelevant fluff?”
+
+        Output Specification: Developers often need code in a precise format. The evaluation should check if the prompt requests a well-defined output (e.g. code snippet, JSON, documentation). The OpenAI best-practices and developer guides highlight the importance of specifying output format explicitly. 
+        For example, adding a “Desired format” or listing required fields helps the model parse the task. The prompt-evaluator should score prompts higher if they instruct the LLM to “Output as JSON” or “Provide a function with docstrings”, and lower if the prompt says nothing about output form. This aligns with research showing structured prompts (e.g. with output schema) yield more robust code
+
+        Constraints and Edge Cases: For coding tasks, it’s important that prompts mention constraints (e.g. time/space complexity, coding standards) and consider errors. The evaluator should look for instructions like “handle null inputs” or “include unit tests”. The best-practices template explicitly includes a “Constraints & Quality standards” section. 
+        The rubric could include: “Does the prompt specify constraints (e.g. size limits, performance, style)?” and “Are example cases or edge conditions mentioned?” Neglecting edge cases often causes bugs later, 
+        so prompts that ask the AI to check or validate its output (another best-practice) should be rated higher.
+
+        Prompt Length and Focus: The evaluator should consider brevity versus detail. According to recent research, “Shorter is better” for code prompts (under ~50 words for simple tasks), whereas overly long prompts can add noise. 
+        However, complex tasks need enough detail. The rubric might ask: “Is the prompt concise yet complete? Is any part redundant or missing?” For very short prompts, penalize missing information; for overly verbose prompts, penalize superfluous context. Ensuring the prompt “doesn’t overwhelm” the model aligns with advice to use clean formatting and clear delimiters.
+      
+        Relevance and Feasibility: The evaluator should judge whether the prompt stays on topic and is realistically answerable. This includes checking if the request is within the model’s capabilities and uses provided information only (to avoid hallucination). Though not in the original criteria list, we can add “relevance” or strengthen “feasibility” to cover this. Metrics research stresses that outputs must be grounded and aligned with intent. 
+        For example, if a prompt asks the AI to invent facts or do something impossible, feasibility should be marked low. The prompt-evaluator can explicitly note if the prompt avoids speculation (which can cause AI hallucination) or erroneously asks for private/personal data (safety consideration).
+
+        Developer-Focused Recommendations:
+        Language and Environment: Check if the prompt names the programming language or version, target platform, or any libraries needed. A prompt missing this can cause ambiguous code output. For instance, specifying “Python 3.11” or “JavaScript (ES6)” is crucial. The rubric can include “Language specified?” as a sub-item under clarity or specificity.
+        Examples and Use Cases: The best template suggests giving examples or test cases. The evaluator should look for them. Prompts that include sample inputs/outputs or usage scenarios are usually higher quality. Encourage users to “Provide example scenarios” if missing, as this guides the AI effectively.
+        Error Handling and Testing: For coding prompts, the evaluator should note if the user reminds the AI to write robust code. Check for phrases like “include error handling”, “validate input”, or “write unit tests”. These improve reliability and reduce bugs, aligning with the goal of not introducing new issues.
+        Output Validation: The prompt-evaluator can suggest that an excellent prompt asks the AI to verify its output (e.g. “Check your code for mistakes”), a technique shown to improve code quality. If the prompt lacks this, the evaluator’s feedback can recommend it.
+
+
+        Structuring the Evaluator Prompt:
+        To help the LLM judge, the system prompt itself should be explicit and structured:
+        Explicit JSON Output: Continue requiring “Return only valid JSON: {"score": number, "reasons": string[]}”. This ensures consistency. To improve, remind the model that no additional text or explanation is allowed outside the JSON. Clear formatting instructions reduce parsing errors.
+        Detailed Criteria Definitions: In the rubric text, the evaluation categories could be briefly defined or exemplified. For instance, instead of just listing “Context: does the prompt use too much context?”, rephrase as “Context: Is the background information sufficient and relevant (not too little or too much)?”. Similarly, refine “Robustness” to explicitly mention handling errors or edge cases. Making each bullet slightly more descriptive helps the LLM internalize the check.
+        Handle Short vs. Long Prompts: Instruct the evaluator to adapt scoring based on prompt length. For example, a very brief user prompt might naturally score lower in completeness, and the evaluator should note missing details. Conversely, a very long prompt should not be penalized if every detail is relevant. The rubric could have an item like “Prompt Length: Assess whether the prompt’s length is appropriate (neither too brief nor needlessly verbose)”, reflecting the “shorter is better” principle.
+        Avoid Ambiguity in Scoring: Define the 0–100 range concretely. The guidelines (90–100 excellent, etc.) are good, but the evaluator could benefit from more nuance (e.g., what constitutes a “minor issue” versus a “major flaw”). Adding a sentence like “Use 0–100 scale with these bands; award points for each criterion met, and deduct for gaps” could improve consistency.
         
         Return ONLY valid JSON: {"score": number, "reasons": string[]}
         
