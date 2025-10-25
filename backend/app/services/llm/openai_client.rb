@@ -1,9 +1,22 @@
 require 'net/http'
 require 'json'
+require 'openssl'
 
 module Llm
   class OpenaiClient
     OPENAI_URL = URI('https://api.openai.com/v1/chat/completions')
+
+    def self.net_http(timeout:)
+      http = Net::HTTP.new(OPENAI_URL.host, OPENAI_URL.port)
+      http.use_ssl = true
+      http.read_timeout = timeout
+      http.open_timeout = timeout
+      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      store = OpenSSL::X509::Store.new
+      store.set_default_paths
+      http.cert_store = store
+      http
+    end
 
     def self.judge_prompt(prompt, model: ENV.fetch('OPENAI_MODEL', 'gpt-4o-mini'), timeout: 20, max_retries: 3)
       # Build a strict JSON-only instruction
@@ -41,10 +54,7 @@ module Llm
         max_tokens: 200
       }
 
-      http = Net::HTTP.new(OPENAI_URL.host, OPENAI_URL.port)
-      http.use_ssl = true
-      http.read_timeout = timeout
-      http.open_timeout = timeout
+      http = net_http(timeout: timeout)
       req = Net::HTTP::Post.new(OPENAI_URL.request_uri)
       api_key = ENV['OPENAI_API_KEY']
       req['Authorization'] = "Bearer #{api_key}" if api_key && !api_key.empty?
@@ -153,9 +163,7 @@ module Llm
       }
       payload[:max_tokens] = max_tokens if max_tokens
 
-      http = Net::HTTP.new(OPENAI_URL.host, OPENAI_URL.port)
-      http.use_ssl = true
-      http.read_timeout = timeout
+      http = net_http(timeout: timeout)
       req = Net::HTTP::Post.new(OPENAI_URL.request_uri)
       api_key = ENV['OPENAI_API_KEY']
       req['Authorization'] = "Bearer #{api_key}" if api_key && !api_key.empty?
@@ -255,9 +263,7 @@ module Llm
         response_format: { type: 'json_object' }
       }
     
-      http = Net::HTTP.new(OPENAI_URL.host, OPENAI_URL.port)
-      http.use_ssl = true
-      http.read_timeout = timeout
+      http = net_http(timeout: timeout)
       req = Net::HTTP::Post.new(OPENAI_URL.request_uri)
       api_key = ENV['OPENAI_API_KEY']
       req['Authorization'] = "Bearer #{api_key}" if api_key && !api_key.empty?
