@@ -1,0 +1,20 @@
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/erb-5.0.2/ext/erb/escape
+/Users/carsonross/.rvm/rubies/ruby-3.2.3/bin/ruby extconf.rb
+checking for rb_ext_ractor_safe() in ruby.h... yes
+creating Makefile
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/erb-5.0.2/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20251025-79208-qnbmyr sitelibdir\=./.gem.20251025-79208-qnbmyr clean
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/erb-5.0.2/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20251025-79208-qnbmyr sitelibdir\=./.gem.20251025-79208-qnbmyr
+compiling escape.c
+linking shared-object erb/escape.bundle
+ld: warning: ignoring duplicate libraries: '-lruby.3.2'
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/erb-5.0.2/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20251025-79208-qnbmyr sitelibdir\=./.gem.20251025-79208-qnbmyr install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 escape.bundle ./.gem.20251025-79208-qnbmyr/erb
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.2.0/gems/erb-5.0.2/ext/erb/escape
+make DESTDIR\= sitearchdir\=./.gem.20251025-79208-qnbmyr sitelibdir\=./.gem.20251025-79208-qnbmyr clean

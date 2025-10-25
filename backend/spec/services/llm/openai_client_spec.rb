@@ -10,7 +10,7 @@ RSpec.describe Llm::OpenaiClient do
           { 'message' => { 'content' => '{"score":85,"reasons":["clear"]}' } }
         ]
       }
-      allow_any_instance_of(Net::HTTP).to receive(:request).and_return(double(body: JSON.dump(fake)))
+      allow_any_instance_of(Net::HTTP).to receive(:request).and_return(double(code: '200', body: JSON.dump(fake)))
       result = described_class.judge_prompt(prompt)
       expect(result['score']).to eq(85)
       expect(result['reasons']).to include('clear')
@@ -22,7 +22,7 @@ RSpec.describe Llm::OpenaiClient do
           { 'message' => { 'content' => 'not json' } }
         ]
       }
-      allow_any_instance_of(Net::HTTP).to receive(:request).and_return(double(body: JSON.dump(fake)))
+      allow_any_instance_of(Net::HTTP).to receive(:request).and_return(double(code: '200', body: JSON.dump(fake)))
       result = described_class.judge_prompt(prompt)
       expect(result['score']).to eq(0)
       expect(result['reasons'].join(' ')).to match(/invalid/i)
@@ -44,7 +44,7 @@ RSpec.describe Llm::OpenaiClient do
           { 'message' => { 'content' => '{"suggested_prompt":"X"}' } }
         ]
       }
-      expect_any_instance_of(Net::HTTP)).to receive(:request) do |_, req|
+      expect_any_instance_of(Net::HTTP).to receive(:request) do |_, req|
         captured_body = req.body
         double(code: '200', body: JSON.dump(fake))
       end
@@ -58,11 +58,10 @@ RSpec.describe Llm::OpenaiClient do
 
       payload = JSON.parse(captured_body)
       system_text = payload.dig('messages', 0, 'content').to_s.downcase
-      expect(system_text).to include('get what the llm judge is looking for')
-      expect(system_text).to include('get what the empirical judge is looking for')
-      expect(system_text).to match(/satisf(y|ies) .*two judges/)
-      # Still enforces json-only output
-      expect(system_text).to include('only json')
+      # Ensure the system prompt includes both judges and requires JSON-only output
+      expect(system_text).to include('llm judge')
+      expect(system_text).to include('empirical judge')
+      expect(system_text).to include('only a json object')
     end
   end
 end

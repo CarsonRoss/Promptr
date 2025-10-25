@@ -90,6 +90,7 @@ module Llm
       req.body = JSON.dump(payload)
 
       attempts = 0
+      content = ""
       t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f
       Rails.logger.info("[LLM::OpenaiClient] judge_prompt START model=#{model} timeout=#{timeout}s") if defined?(Rails)
       loop do

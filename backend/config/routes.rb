@@ -16,9 +16,13 @@ Rails.application.routes.draw do
       post 'create-checkout-session', to: 'payments#checkout'
       post 'webhooks/stripe', to: 'webhooks#stripe'
       get  'device/status', to: 'devices#status'
-      get 'device/reset', to: 'devices#reset'
-      get 'subscription/status', to: 'subscriptions#status'
+      get  'device/reset', to: 'devices#reset'
+      get  'subscription/status', to: 'subscriptions#status'
       post 'subscription/cancel', to: 'subscriptions#cancel'
+      post 'auth/login', to: 'auth#login'
+      post 'auth/signup', to: 'auth#signup'
+      post 'auth/verify_email', to: 'auth#verify_email'
+      post 'auth/resend_verification', to: 'auth#resend_verification'
     end
   end
 end
