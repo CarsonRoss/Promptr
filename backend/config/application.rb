@@ -43,5 +43,8 @@ module Backend
 
     # Enable Rack::Attack
     config.middleware.use Rack::Attack
+
+    # Enable cookies for API-only mode so we can set HttpOnly auth cookies
+    config.middleware.use ActionDispatch::Cookies
   end
 end

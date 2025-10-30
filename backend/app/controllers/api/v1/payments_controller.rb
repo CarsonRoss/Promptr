@@ -7,43 +7,44 @@ module Api
       def checkout
         device_id = params[:device_id].to_s.presence || request.headers['X-Device-Id']
         return render json: { error: 'device_id required' }, status: :bad_request unless device_id.present?
-
+      
         device = Device.find_or_initialize_by(device_id: device_id)
-        if device.paid?
-          return render json: { error: 'already_paid' }, status: :conflict
-        end
-
+        return render json: { error: 'already_paid' }, status: :conflict if device.paid?
+      
         success_url = ENV['STRIPE_SUCCESS_URL'].presence || default_success_url
         cancel_url  = ENV['STRIPE_CANCEL_URL'].presence  || default_cancel_url
-
+      
         line_items = if ENV['STRIPE_PRICE_ID'].present?
-          [ { price: ENV['STRIPE_PRICE_ID'], quantity: 1 } ]
+          [{ price: ENV['STRIPE_PRICE_ID'], quantity: 1 }]
         else
-          amount_cents = (ENV['STRIPE_UNIT_AMOUNT'] || '500').to_i # $5 default
+          amount_cents = (ENV['STRIPE_UNIT_AMOUNT'] || '499').to_i
           product_name = ENV['STRIPE_PRODUCT_NAME'] || 'Monthly access'
           currency = (ENV['STRIPE_CURRENCY'] || 'usd')
-          [ {
-              price_data: {
-                currency: currency,
-                product_data: { name: product_name },
-                unit_amount: amount_cents,
-                recurring: { interval: 'month' }
-              },
-              quantity: 1
-            } ]
+          [{
+            price_data: {
+              currency: currency,
+              product_data: { name: product_name },
+              unit_amount: amount_cents,
+              recurring: { interval: 'month' }
+            },
+            quantity: 1
+          }]
         end
-
+      
+        meta = { device_id: device_id }
+        if (u = current_user_from_cookie)
+          meta[:user_id] = u.id
+        end
+      
         session = Stripe::Checkout::Session.create(
           mode: 'subscription',
           line_items: line_items,
           success_url: success_url_with_session(success_url),
           cancel_url: cancel_url,
-          metadata: { device_id: device_id }
+          metadata: meta
         )
-
-        # Cache the session id for this device so we can confirm without relying on the client param
+      
         Rails.cache.write(["device:last_checkout_session", device_id].join(':'), session.id, expires_in: 20.minutes)
-
         render json: { url: session.url }
       rescue Stripe::StripeError => e
         Rails.logger.error("[Payments#checkout] Stripe error: #{e.class} #{e.message}")
@@ -92,22 +93,30 @@ module Api
       # POST /api/v1/payments/confirm
       # Body: { session_id: 'cs_test_...' }
       def confirm
-        # Revert to simpler, previously working confirm flow
         sid = params[:session_id].to_s
-        # If no session id provided or placeholder value, try cache via device header
         if sid.empty? || sid.include?('{CHECKOUT_SESSION_ID}')
           did = request.headers['X-Device-Id'].to_s
           cached = Rails.cache.read(["device:last_checkout_session", did].join(':'))
           sid = cached.to_s if cached.present?
         end
         return render json: { error: 'session_id missing' }, status: :bad_request if sid.blank?
-
+      
         s = Stripe::Checkout::Session.retrieve(sid)
-        device_id = s.respond_to?(:metadata) ? s.metadata['device_id'] : s['metadata'] && s['metadata']['device_id']
-        return render json: { error: 'missing device_id' }, status: :unprocessable_entity unless device_id.present?
-
-        device = Device.find_or_initialize_by(device_id: device_id)
-        device.update!(paid: true, stripe_customer_id: (s.respond_to?(:customer) ? s.customer : s['customer']))
+        meta = s.respond_to?(:metadata) ? s.metadata : s['metadata']
+        device_id = meta && meta['device_id']
+        user_id = meta && meta['user_id']
+      
+        if user_id.present?
+          if (user = User.find_by(id: user_id))
+            user.update!(status: 'paid')
+          end
+        end
+      
+        if device_id.present?
+          device = Device.find_or_initialize_by(device_id: device_id)
+          device.update!(stripe_customer_id: (s.respond_to?(:customer) ? s.customer : s['customer']))
+        end
+      
         render json: { paid: true }
       rescue Stripe::StripeError => e
         Rails.logger.error("[Payments#confirm] Stripe error: #{e.class} #{e.message}")

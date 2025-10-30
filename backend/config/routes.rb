@@ -18,11 +18,14 @@ Rails.application.routes.draw do
       get  'device/status', to: 'devices#status'
       get  'device/reset', to: 'devices#reset'
       get  'subscription/status', to: 'subscriptions#status'
+      get  'auth/check-email', to: 'auth#check_if_email_exists'
       post 'subscription/cancel', to: 'subscriptions#cancel'
       post 'auth/login', to: 'auth#login'
       post 'auth/signup', to: 'auth#signup'
       post 'auth/verify_email', to: 'auth#verify_email'
       post 'auth/resend_verification', to: 'auth#resend_verification'
+      get  'auth/session', to: 'auth#session'
+      post 'auth/logout', to: 'auth#logout'
     end
   end
 end

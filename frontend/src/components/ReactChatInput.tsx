@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import AuthModal from './AuthModal';
-import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout, getSubscriptionStatus, cancelSubscription, type SubscriptionStatus } from '../lib/api';
+import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout, getSubscriptionStatus, cancelSubscription, type SubscriptionStatus, getSession, logout } from '../lib/api';
 
 export default function ChatInput() {
   const [message, setMessage] = useState('');
@@ -22,6 +22,10 @@ export default function ChatInput() {
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
   const [isUpgrading, setIsUpgrading] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState<{ status: string } | null>(null)
+  const [pendingUpgrade, setPendingUpgrade] = useState(false)
+  
 
   // Typewriter display states
   const [llmText, setLlmText] = useState<string>('');
@@ -57,6 +61,12 @@ export default function ChatInput() {
         const status = await getDeviceStatus()
         setRemainingUses(status.remaining_uses)
         setPaid(status.paid)
+        // Also check session auth state
+        try {
+          const sess = await getSession()
+          setIsAuthenticated(!!sess.authenticated)
+          setUser(sess.user || null)
+        } catch {}
         // If paid, fetch subscription status immediately so banner reflects
         // cancel-at-period-end state without waiting for the periodic refresher.
         if (status.paid) {
@@ -116,9 +126,16 @@ export default function ChatInput() {
             const qs = params.toString()
             const newUrl = window.location.pathname + (qs ? `?${qs}` : '')
             window.history.replaceState({}, '', newUrl)
-            // Show purchase success flash
             showFlash('Purchase successful')
             setPaid(true)
+          
+            // Refresh session so user.status reflects 'paid' for UI driven by user
+            try {
+              const sess = await getSession()
+              setIsAuthenticated(!!sess.authenticated)
+              setUser(sess.user || null)
+            } catch {}
+          
             return
           }
         } catch {
@@ -398,33 +415,60 @@ export default function ChatInput() {
                 )
               ) : (
                 <div className="flex items-center gap-3">
-                  <button
-                    className="upgrade-now"
-                    disabled={isUpgrading}
-                    onClick={async () => {
-                      if (isUpgrading) return
-                      setIsUpgrading(true)
-                      try {
-                        const { url } = await createCheckout()
-                        if (!url) throw new Error('Missing checkout URL')
-                        window.location.href = url
-                      } catch (e) {
-                        showFlash('Upgrade failed. Please try again.')
-                        console.error('Upgrade error:', e)
-                      } finally {
-                        setIsUpgrading(false)
-                      }
-                    }}
-                  >
-                    {isUpgrading ? 'Redirecting…' : 'Upgrade Now'}
-                  </button>
-                  <button
-                    className="text-sm font-semibold"
-                    style={{ color: '#2563eb' }}
-                    onClick={() => setAuthOpen(true)}
-                  >
-                    Sign in
-                  </button>
+                  {(!isAuthenticated || (user && user.status !== 'paid')) && (
+                    <button
+                      className="upgrade-now"
+                      disabled={isUpgrading}
+                      onClick={async () => {
+                        if (isUpgrading) return
+                        
+                        // If not authenticated, show auth modal first
+                        if (!isAuthenticated) {
+                          setPendingUpgrade(true)
+                          setAuthOpen(true)
+                          return
+                        }
+                        
+                        // Proceed with checkout for authenticated users
+                        setIsUpgrading(true)
+                        try {
+                          const { url } = await createCheckout()
+                          if (!url) throw new Error('Missing checkout URL')
+                          window.location.href = url
+                        } catch (e) {
+                          showFlash('Upgrade failed. Please try again.')
+                          console.error('Upgrade error:', e)
+                        } finally {
+                          setIsUpgrading(false)
+                        }
+                      }}
+                    >
+                      {isUpgrading ? 'Redirecting…' : 'Upgrade Now'}
+                    </button>
+                  )}
+                  {!isAuthenticated ? (
+                    <button
+                      className="text-sm font-semibold"
+                      style={{ color: '#2563eb' }}
+                      onClick={() => setAuthOpen(true)}
+                    >
+                      Sign Up
+                    </button>
+                  ) : (
+                    <button
+                      className="text-sm text-slate-600 hover:underline"
+                      onClick={async () => {
+                        try { 
+                          await logout() 
+                        } catch {}
+                        setIsAuthenticated(false)
+                        setUser(null)
+                        showFlash('Signed out')
+                      }}
+                    >
+                      Sign out
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -556,7 +600,29 @@ export default function ChatInput() {
           {/* Footer hint */}
         </div>
       </div>
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      <AuthModal open={authOpen} onClose={async () => {
+        setAuthOpen(false)
+        try {
+          const s = await getSession()
+          setIsAuthenticated(!!s.authenticated)
+          setUser(s.user || null)
+          // If user came from upgrade flow and is now authenticated, proceed to checkout
+          if (pendingUpgrade && s.authenticated) {
+            setPendingUpgrade(false)
+            setIsUpgrading(true)
+            try {
+              const { url } = await createCheckout()
+              if (!url) throw new Error('Missing checkout URL')
+              window.location.href = url
+            } catch (e) {
+              showFlash('Upgrade failed. Please try again.')
+              console.error('Upgrade error:', e)
+            } finally {
+              setIsUpgrading(false)
+            }
+          }
+        } catch {}
+      }} />
     </div>
   );
 }

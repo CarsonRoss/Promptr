@@ -36,10 +36,18 @@ module Api
         session = event['data']['object']
         device_id = session.dig('metadata', 'device_id').to_s
         customer_id = session['customer']
-        return unless device_id.present?
-
-        device = Device.find_or_initialize_by(device_id: device_id)
-        device.update!(paid: true, stripe_customer_id: customer_id)
+        user_id = session.dig('metadata', 'user_id').to_s
+      
+        if user_id.present?
+          if (user = User.find_by(id: user_id))
+            user.update!(status: 'paid')
+          end
+        end
+      
+        if device_id.present?
+          device = Device.find_or_initialize_by(device_id: device_id)
+          device.update!(stripe_customer_id: customer_id)
+        end
       end
     end
   end

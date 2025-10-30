@@ -12,6 +12,9 @@ module Api
           return render json: { error: 'invalid_credentials' }, status: :unauthorized
         end
         token = AuthService.generate_jwt(user_id: user.id)
+        # Also set as HttpOnly cookie for session-style auth from browser
+        claims = AuthService.decode_jwt(token)
+        set_auth_cookie(token, expires_at: (Time.at(claims[:exp]) rescue 30.days.from_now))
         render json: { token: token }
       end
 
@@ -56,6 +59,10 @@ module Api
           user = User.create!(email: email, password: pwd, password_confirmation: pwdc, status: 'unpaid')
           user.verify_email_timestamp!
           Rails.cache.delete(cache_key_email)
+          # Auto sign-in: issue JWT cookie
+          token = AuthService.generate_jwt(user_id: user.id)
+          claims = AuthService.decode_jwt(token)
+          set_auth_cookie(token, expires_at: (Time.at(claims[:exp]) rescue 30.days.from_now))
           return render json: { verified: true }
         end
 
@@ -68,6 +75,10 @@ module Api
         return render json: { error: 'invalid_token' }, status: :not_found unless user
         user.verify_email_timestamp!
         Rails.cache.delete(["user:verify_token", token].join(':'))
+        # Auto sign-in: issue JWT cookie
+        token2 = AuthService.generate_jwt(user_id: user.id)
+        claims2 = AuthService.decode_jwt(token2)
+        set_auth_cookie(token2, expires_at: (Time.at(claims2[:exp]) rescue 30.days.from_now))
         render json: { verified: true }
       end
 
@@ -83,6 +94,30 @@ module Api
         else
           render json: { error: 'email_send_failed' }, status: :service_unavailable
         end
+      end
+
+      # GET /api/v1/auth/session
+      # Returns { authenticated: boolean, user?: {...} }
+      def session
+        user = current_user_from_cookie
+        if user
+          render json: { authenticated: true, user: { id: user.id, email: user.email, status: user.status, verified_at: user.verified_at } }
+        else
+          render json: { authenticated: false }
+        end
+      end
+
+      # POST /api/v1/auth/logout
+      def logout
+        clear_auth_cookie
+        render json: { ok: true }
+      end
+
+      def check_if_email_exists
+        email  = params[:email].to_s.downcase.strip
+        exists = User.exists?(email: email)
+
+        render json: { exists: exists }
       end
     end
   end

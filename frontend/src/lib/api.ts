@@ -55,6 +55,7 @@ export async function getDeviceStatus(signal?: AbortSignal): Promise<DeviceStatu
   const res = await fetch(`${BASE_URL}/api/v1/device/status`, {
     method: 'GET',
     headers: authHeaders(),
+    credentials: 'include',
     signal,
   })
   if (!res.ok) throw new Error(`Status failed: ${res.status}`)
@@ -65,6 +66,7 @@ export async function createCheckout(signal?: AbortSignal): Promise<{ url: strin
   const res = await fetch(`${BASE_URL}/api/v1/payments/checkout`, {
     method: 'POST',
     headers: authHeaders(),
+    credentials: 'include',
     body: JSON.stringify({ device_id: getDeviceId() }),
     signal,
   })
@@ -76,6 +78,7 @@ export async function confirmCheckout(sessionId: string, signal?: AbortSignal): 
   const res = await fetch(`${BASE_URL}/api/v1/payments/confirm`, {
     method: 'POST',
     headers: authHeaders(),
+    credentials: 'include',
     body: JSON.stringify({ session_id: sessionId }),
     signal,
   })
@@ -104,6 +107,7 @@ export async function cancelSubscription(signal?: AbortSignal): Promise<{ cancel
   const res = await fetch(`${BASE_URL}/api/v1/subscription/cancel`, {
     method: 'POST',
     headers: authHeaders(),
+    credentials: 'include',
     body: JSON.stringify({}),
     signal,
   })
@@ -117,6 +121,7 @@ export async function signup(email: string, password: string, passwordConfirmati
   const res = await fetch(`${BASE_URL}/api/v1/auth/signup`, {
     method: 'POST',
     headers: authHeaders(),
+    credentials: 'include',
     body: JSON.stringify({ email, password, password_confirmation: passwordConfirmation ?? password }),
     signal,
   })
@@ -128,6 +133,7 @@ export async function login(email: string, password: string, signal?: AbortSigna
   const res = await fetch(`${BASE_URL}/api/v1/auth/login`, {
     method: 'POST',
     headers: authHeaders(),
+    credentials: 'include',
     body: JSON.stringify({ email, password }),
     signal,
   })
@@ -148,6 +154,7 @@ export async function verifyEmailWithCode(
   const res = await fetch(`${BASE_URL}/api/v1/auth/verify_email`, {
     method: 'POST',
     headers: authHeaders(),
+    credentials: 'include',
     body: JSON.stringify(payload),
     signal,
   })
@@ -163,10 +170,37 @@ export async function resendVerification(email: string, signal?: AbortSignal): P
   const res = await fetch(`${BASE_URL}/api/v1/auth/resend_verification`, {
     method: 'POST',
     headers: authHeaders(),
+    credentials: 'include',
     body: JSON.stringify({ email }),
     signal,
   })
   if (!res.ok) throw new Error(`Resend verification failed: ${res.status}`)
+  return res.json()
+}
+
+// Session helpers
+export type SessionStatus = { authenticated: boolean; user?: { id: number; email: string; status: string; verified_at?: string | null } }
+
+export async function getSession(signal?: AbortSignal): Promise<SessionStatus> {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/session`, {
+    method: 'GET',
+    headers: authHeaders(),
+    credentials: 'include',
+    signal,
+  })
+  if (!res.ok) throw new Error(`Session check failed: ${res.status}`)
+  return res.json()
+}
+
+export async function logout(signal?: AbortSignal): Promise<{ ok: boolean }> {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/logout`, {
+    method: 'POST',
+    headers: authHeaders(),
+    credentials: 'include',
+    body: JSON.stringify({}),
+    signal,
+  })
+  if (!res.ok) throw new Error(`Logout failed: ${res.status}`)
   return res.json()
 }
 
