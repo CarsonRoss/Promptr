@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import AuthModal from './AuthModal';
+import LoginModal from './LoginModal';
+import UserProfileDropdown from './UserModal';
 import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout, getSubscriptionStatus, cancelSubscription, type SubscriptionStatus, getSession, logout } from '../lib/api';
 
 export default function ChatInput() {
@@ -21,9 +23,10 @@ export default function ChatInput() {
   const [paid, setPaid] = useState<boolean | null>(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
   const [isUpgrading, setIsUpgrading] = useState(false)
-  const [authOpen, setAuthOpen] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
+  const [signupOpen, setSignupOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<{ status: string } | null>(null)
+  const [user, setUser] = useState<{ status: string; email?: string } | null>(null)
   const [pendingUpgrade, setPendingUpgrade] = useState(false)
   
 
@@ -368,130 +371,69 @@ export default function ChatInput() {
   }
 
   return (
-    <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-start justify-center p-6">
-      <div className="w-full max-w-5xl relative flex gap-8 pt-16">
+    <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-start justify-center p-6 relative">
+      {/* Top-right auth buttons or user icon */}
+      <div className="absolute top-2 right-2 z-40">
+        {!isAuthenticated ? (
+          <div className="flex gap-2">
+            <button
+              className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-full hover:bg-gray-100 transition-all duration-200 shadow-md hover:shadow-lg"
+              onClick={() => { setLoginOpen(true); }}
+            >
+              Log In
+            </button>
+            <button
+              className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full border-2 border-blue-600 hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              onClick={() => { setSignupOpen(true); }}
+            >
+              Sign Up
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            {(user?.status !== 'paid') && (
+              <button
+                className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-full border-2 border-blue-600 hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                onClick={async () => {
+                  try {
+                    const { url } = await createCheckout()
+                    if (!url) throw new Error('Missing checkout URL')
+                    window.location.href = url
+                  } catch (e) {
+                    showFlash('Upgrade failed. Please try again.')
+                    console.error('Upgrade error:', e)
+                  }
+                }}
+              >
+                Upgrade Now
+              </button>
+            )}
+            <UserProfileDropdown userEmail={user?.email || ''} embedded />
+          </div>
+        )}
+      </div>
+      <div className="w-full max-w-5xl relative flex gap-8 pt-6">
         {/* Flash area */}
         <div id="flash-root" className="absolute -top-8 left-1/2 -translate-x-1/2"></div>
 
-        {/* Subscription Banner */}
-        <div className="subscription-banner absolute top-0 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-sm">
-          <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-            {/* Left: Subscription Status */}
-            <div className="flex items-center gap-3">
-              {paid === true ? (
-                <div className="flex items-center gap-2 text-green-700">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-sm font-medium">Active Subscription</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-slate-600">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-sm">Free Trial</span>
-                  {remainingUses != null && remainingUses <= 5 && (
-                    <span className="text-xs text-slate-500">({remainingUses} uses left)</span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Right: Action Buttons */}
-            <div className="flex items-center gap-3">
-              {paid === true ? (
-                subscriptionStatus?.cancel_at_period_end ? (
-                  <span className="text-sm text-slate-600">
-                    Cancelled — access until {subscriptionStatus.current_period_end ? new Date(subscriptionStatus.current_period_end).toLocaleDateString() : ''}
-                  </span>
-                ) : (
-                  <button
-                    className="px-3 py-1.5 text-sm border border-red-200 bg-white text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                    onClick={handleCancelSubscription}
-                  >
-                    Cancel Subscription
-                  </button>
-                )
-              ) : (
-                <div className="flex items-center gap-3">
-                  {(!isAuthenticated || (user && user.status !== 'paid')) && (
-                    <button
-                      className="upgrade-now"
-                      disabled={isUpgrading}
-                      onClick={async () => {
-                        if (isUpgrading) return
-                        
-                        // If not authenticated, show auth modal first
-                        if (!isAuthenticated) {
-                          setPendingUpgrade(true)
-                          setAuthOpen(true)
-                          return
-                        }
-                        
-                        // Proceed with checkout for authenticated users
-                        setIsUpgrading(true)
-                        try {
-                          const { url } = await createCheckout()
-                          if (!url) throw new Error('Missing checkout URL')
-                          window.location.href = url
-                        } catch (e) {
-                          showFlash('Upgrade failed. Please try again.')
-                          console.error('Upgrade error:', e)
-                        } finally {
-                          setIsUpgrading(false)
-                        }
-                      }}
-                    >
-                      {isUpgrading ? 'Redirecting…' : 'Upgrade Now'}
-                    </button>
-                  )}
-                  {!isAuthenticated ? (
-                    <button
-                      className="text-sm font-semibold"
-                      style={{ color: '#2563eb' }}
-                      onClick={() => setAuthOpen(true)}
-                    >
-                      Sign Up
-                    </button>
-                  ) : (
-                    <button
-                      className="text-sm text-slate-600 hover:underline"
-                      onClick={async () => {
-                        try { 
-                          await logout() 
-                        } catch {}
-                        setIsAuthenticated(false)
-                        setUser(null)
-                        showFlash('Signed out')
-                      }}
-                    >
-                      Sign out
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+        {/* Top-centered rings (no panel background) */}
+        <div className="w-full absolute left-1/2 -translate-x-1/2 top-2 flex justify-center items-end gap-8 pointer-events-none">
+          <div className="flex flex-col items-center transform translate-y-1 pointer-events-auto">
+            <ScoreRing label="" value={llmScore} loading={isScoring} size={72} help={"Uses GPT-4o-mini to evaluate prompt quality based on clarity, specificity, feasibility, and completeness criteria."} />
+            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500 text-center w-full">LLM</div>
+          </div>
+          <div className="flex flex-col items-center transform -translate-y-1 pointer-events-auto">
+            <ScoreRing label="" value={averageScore} loading={isScoring} size={116} help={"Weighted average of LLM (60%) and Empirical (40%) scores. Indicates overall prompt quality based on AI evaluation and real-world testing."} />
+            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500 text-center w-full">Overall</div>
+          </div>
+          <div className="flex flex-col items-center transform translate-y-1 pointer-events-auto">
+            <ScoreRing label="" value={empiricalScore} loading={isScoring} size={72} help={"Runs your prompt through GPT-4o-mini twice, then evaluates output consistency, quality, and structure. High scores indicate reliable, well-formatted results."} />
+            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500 text-center w-full">Empirical</div>
           </div>
         </div>
-        {/* Left scoring panel (modal) */}
-        <aside className="w-56 bg-white rounded-2xl shadow-lg border border-slate-200 p-6 flex flex-col items-center gap-6">
-          <div className="flex flex-col items-center">
-            <ScoreRing label="" value={averageScore} loading={isScoring} size={96} help={"Weighted average of LLM (60%) and Empirical (40%) scores. Indicates overall prompt quality based on AI evaluation and real-world testing."} />
-            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Overall Score</div>
-          </div>
-          <div className="flex flex-col items-center">
-            <ScoreRing label="" value={llmScore} loading={isScoring} size={64} help={"Uses GPT-4o-mini to evaluate prompt quality based on clarity, specificity, feasibility, and completeness criteria."} />
-            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">LLM</div>
-          </div>
-          <div className="flex flex-col items-center">
-            <ScoreRing label="" value={empiricalScore} loading={isScoring} size={64} help={"Runs your prompt through GPT-4o-mini twice, then evaluates output consistency, quality, and structure. High scores indicate reliable, well-formatted results."} />
-            <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500">Empirical</div>
-          </div>
-        </aside>
 
         {/* Main content (no modal/card wrapper) */}
-        <div className="flex-1">
+        <div className="flex-1 mt-36">
 
           {/* Input with inline send */}
           <div className="p-4 flex items-start gap-6">
@@ -600,13 +542,35 @@ export default function ChatInput() {
           {/* Footer hint */}
         </div>
       </div>
-      <AuthModal open={authOpen} onClose={async () => {
-        setAuthOpen(false)
+      <LoginModal open={loginOpen} onClose={async () => {
+        setLoginOpen(false)
         try {
           const s = await getSession()
           setIsAuthenticated(!!s.authenticated)
           setUser(s.user || null)
           // If user came from upgrade flow and is now authenticated, proceed to checkout
+          if (pendingUpgrade && s.authenticated) {
+            setPendingUpgrade(false)
+            setIsUpgrading(true)
+            try {
+              const { url } = await createCheckout()
+              if (!url) throw new Error('Missing checkout URL')
+              window.location.href = url
+            } catch (e) {
+              showFlash('Upgrade failed. Please try again.')
+              console.error('Upgrade error:', e)
+            } finally {
+              setIsUpgrading(false)
+            }
+          }
+        } catch {}
+      }} />
+      <AuthModal open={signupOpen} onClose={async () => {
+        setSignupOpen(false)
+        try {
+          const s = await getSession()
+          setIsAuthenticated(!!s.authenticated)
+          setUser(s.user || null)
           if (pendingUpgrade && s.authenticated) {
             setPendingUpgrade(false)
             setIsUpgrading(true)

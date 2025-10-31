@@ -1,11 +1,10 @@
 import React from 'react'
-import { signup, login, verifyEmailWithCode, resendVerification } from '../lib/api'
+import { signup, verifyEmailWithCode, resendVerification } from '../lib/api'
 
 type Step = 'email' | 'password' | 'code' | 'done'
 
 export default function AuthModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [step, setStep] = React.useState<Step>('email')
-  const [mode, setMode] = React.useState<'signup' | 'signin'>('signup')
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [confirm, setConfirm] = React.useState('')
@@ -17,7 +16,7 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
 
   React.useEffect(() => {
     if (!open) {
-      setStep('email'); setMode('signup'); setEmail(''); setPassword(''); setConfirm(''); setCode(''); setError(null); setLoading(false)
+      setStep('email'); setEmail(''); setPassword(''); setConfirm(''); setCode(''); setError(null); setLoading(false)
     }
   }, [open])
 
@@ -89,56 +88,12 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
     }
   }
 
-  async function handleLogin() {
-    if (!email.trim()) { setError('Email is required'); return }
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return }
-    setError(null); setLoading(true)
-    try {
-      await login(email.trim().toLowerCase(), password)
-      onClose()
-    } catch (e) {
-      setError('Invalid email or password')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   if (!open) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-slate-200 p-5">
-        {mode === 'signin' && (
-          <div>
-            <h3 className="text-slate-900 text-lg font-semibold mb-2">Sign in</h3>
-            <label className="block text-sm text-slate-600 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="you@example.com"
-            />
-            <label className="block text-sm text-slate-600 mb-1 mt-3">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter password"
-            />
-            {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
-            <button
-              onClick={handleLogin}
-              className="w-full mt-4 h-10 rounded-full btn-primary disabled:opacity-60"
-              disabled={loading}
-            >Sign in</button>
-            <button onClick={() => { setMode('signup'); setError(null) }} className="mt-2 w-full text-sm text-slate-600 hover:underline">Create an account</button>
-            <button onClick={onClose} className="mt-1 w-full text-sm text-slate-600 hover:underline">Cancel</button>
-          </div>
-        )}
-
-        {mode === 'signup' && step === 'email' && (
+        {step === 'email' && (
           <div>
             <h3 className="text-slate-900 text-lg font-semibold mb-2">Sign Up</h3>
             <label className="block text-sm text-slate-600 mb-1">Email</label>
@@ -155,12 +110,11 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
               className="w-full mt-4 h-10 rounded-full btn-primary disabled:opacity-60"
               disabled={loading}
             >Next</button>
-            <button onClick={() => { setMode('signin'); setError(null) }} className="mt-2 w-full text-sm text-blue-600 hover:underline">Sign in</button>
             <button onClick={onClose} className="mt-2 w-full text-sm text-slate-600 hover:underline">Cancel</button>
           </div>
         )}
 
-        {mode === 'signup' && step === 'password' && (
+        {step === 'password' && (
           <div>
             <h3 className="text-slate-900 text-lg font-semibold mb-2">Welcome</h3>
             <div className="text-xs text-slate-500 mb-3">{email}</div>
@@ -190,7 +144,7 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
           </div>
         )}
 
-        {mode === 'signup' && step === 'code' && (
+        {step === 'code' && (
           <div>
             <h3 className="text-slate-900 text-lg font-semibold mb-2">Enter verification code</h3>
             <div className="text-xs text-slate-500 mb-3">We sent a 6‑digit code to {email}</div>

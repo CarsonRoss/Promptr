@@ -8,8 +8,10 @@ module Api
         device_id = params[:device_id].to_s.presence || request.headers['X-Device-Id']
         return render json: { error: 'device_id required' }, status: :bad_request unless device_id.present?
       
-        device = Device.find_or_initialize_by(device_id: device_id)
-        return render json: { error: 'already_paid' }, status: :conflict if device.paid?
+        # Check user payment status if authenticated, otherwise allow checkout
+        if (user = current_user_from_cookie)
+          return render json: { error: 'already_paid' }, status: :conflict if user.status == 'paid'
+        end
       
         success_url = ENV['STRIPE_SUCCESS_URL'].presence || default_success_url
         cancel_url  = ENV['STRIPE_CANCEL_URL'].presence  || default_cancel_url

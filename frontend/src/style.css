@@ -42,7 +42,6 @@ button {
   font: inherit;
   cursor: pointer;
   transition: border-color 0.25s, background-color 0.2s, color 0.2s;
-  background: transparent;
 }
 button:hover {
   border-color: #ffffff;
