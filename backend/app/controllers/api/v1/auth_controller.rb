@@ -101,7 +101,28 @@ module Api
       def session
         user = current_user_from_cookie
         if user
-          render json: { authenticated: true, user: { id: user.id, email: user.email, status: user.status, verified_at: user.verified_at } }
+          # Adjust reported status based on user access window (after cancellation)
+          effective_status = user.status
+          if user.status == 'paid'
+            begin
+              access_until_str = Rails.cache.read(["user", user.id.to_s, "subscription", "current_period_end"].join(':')).to_s
+              cancel_flag = Rails.cache.read(["user", user.id.to_s, "subscription", "cancel_at_period_end"].join(':')).present?
+              if cancel_flag && access_until_str.present?
+                cutoff = Time.parse(access_until_str).utc rescue nil
+                if cutoff && Time.current.utc >= cutoff
+                  effective_status = 'unpaid'
+                  begin
+                    user.update!(status: 'unpaid')
+                  rescue => e
+                    Rails.logger.warn("[Auth#session] failed to persist unpaid status: #{e.class} #{e.message}")
+                  end
+                end
+              end
+            rescue => _e
+              # Ignore cache/time parse errors
+            end
+          end
+          render json: { authenticated: true, user: { id: user.id, email: user.email, status: effective_status, verified_at: user.verified_at } }
         else
           render json: { authenticated: false }
         end

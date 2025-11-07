@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { User } from 'lucide-react';
+import { logout, getSubscriptionStatus, getSession } from '../lib/api'
+
 
 export default function UserProfileDropdown({ userEmail, embedded = false }: { userEmail: string; embedded?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +13,7 @@ export default function UserProfileDropdown({ userEmail, embedded = false }: { u
         <div
           onClick={() => setIsOpen(!isOpen)}
           className={`bg-white rounded-lg shadow-lg border border-gray-200 cursor-pointer transition-all duration-300 ${
-            isOpen ? 'w-72 h-40' : 'w-12 h-12'
+            isOpen ? 'w-72 h-48' : 'w-12 h-12'
           }`}
         >
           <div className={`transition-opacity duration-200 ${isOpen ? 'opacity-100 delay-150' : 'opacity-0'}`}>
@@ -31,9 +33,35 @@ export default function UserProfileDropdown({ userEmail, embedded = false }: { u
 
                 {/* Manage Subscription Button */}
                 <div className="pt-4">
-                  <button className="w-full px-4 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md">
-                    Manage Subscription
-                  </button>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      const [sess, status] = await Promise.all([getSession(), getSubscriptionStatus()]);
+                      sessionStorage.setItem('ctx_session', JSON.stringify(sess));
+                      sessionStorage.setItem('ctx_sub_status', JSON.stringify(status));
+                    } catch {}
+                    window.location.hash = '#/manage-subscription';
+                  }}
+                  className="px-8 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl border-0"
+                >
+                  Manage Subscription
+                </button>
+                  <div className="pt-3">
+                    <button
+                      onClick={async () => {
+                        try {
+                          await logout();
+                          window.location.reload();
+                        } catch (e) {
+                          console.error('Logout failed', e);
+                        }
+                      }}
+                      className="text-sm text-gray-700"
+                    >
+                      Log Out
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

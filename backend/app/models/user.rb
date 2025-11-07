@@ -1,6 +1,8 @@
 class User < ApplicationRecord
     self.table_name = 'users_tables'
 
+    after_destroy :clear_cache
+
     has_secure_password
 
     STATUSES = %w[paid unpaid]
@@ -24,5 +26,11 @@ class User < ApplicationRecord
 
     def verify_email_timestamp!
         update!(verified_at: Time.current)
+    end
+
+    def clear_cache
+        Rails.cache.delete(["user", id.to_s, "subscription", "cancel_at_period_end"].join(':'))
+        Rails.cache.delete(["user", id.to_s, "subscription", "current_period_end"].join(':'))
+        Rails.cache.delete(["user", id.to_s, "stripe_customer_id"].join(':'))
     end
 end

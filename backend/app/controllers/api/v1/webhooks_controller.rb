@@ -41,6 +41,11 @@ module Api
         if user_id.present?
           if (user = User.find_by(id: user_id))
             user.update!(status: 'paid')
+            begin
+              Rails.cache.write(["user", user.id.to_s, "stripe_customer_id"].join(':'), customer_id, expires_in: 1.year) if customer_id.present?
+            rescue => e
+              Rails.logger.warn("[Webhooks#checkout_completed] failed to cache user stripe id: #{e.class} #{e.message}")
+            end
           end
         end
       

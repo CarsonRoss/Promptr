@@ -115,6 +115,18 @@ export async function cancelSubscription(signal?: AbortSignal): Promise<{ cancel
   return res.json()
 }
 
+export async function reactivateSubscription(signal?: AbortSignal): Promise<{ reactivated: boolean; access_until: string }> {
+  const res = await fetch(`${BASE_URL}/api/v1/subscription/reactivate`, {
+    method: 'POST',
+    headers: authHeaders(),
+    credentials: 'include',
+    body: JSON.stringify({}),
+    signal,
+  })
+  if (!res.ok) throw new Error(`Reactivate subscription failed: ${res.status}`)
+  return res.json()
+}
+
 
 // Auth API helpers
 export async function signup(email: string, password: string, passwordConfirmation?: string, signal?: AbortSignal): Promise<{ created: boolean }> {

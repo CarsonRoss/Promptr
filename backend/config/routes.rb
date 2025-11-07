@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       get  'subscription/status', to: 'subscriptions#status'
       get  'auth/check-email', to: 'auth#check_if_email_exists'
       post 'subscription/cancel', to: 'subscriptions#cancel'
+      post 'subscription/reactivate', to: 'subscriptions#reactivate'
       post 'auth/login', to: 'auth#login'
       post 'auth/signup', to: 'auth#signup'
       post 'auth/verify_email', to: 'auth#verify_email'

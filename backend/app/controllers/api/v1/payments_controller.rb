@@ -111,6 +111,13 @@ module Api
         if user_id.present?
           if (user = User.find_by(id: user_id))
             user.update!(status: 'paid')
+            # Remember stripe customer id for user-level management
+            begin
+              cid = (s.respond_to?(:customer) ? s.customer : s['customer'])
+              Rails.cache.write(["user", user.id.to_s, "stripe_customer_id"].join(':'), cid, expires_in: 1.year) if cid.present?
+            rescue => e
+              Rails.logger.warn("[Payments#confirm] failed to cache user stripe id: #{e.class} #{e.message}")
+            end
           end
         end
       

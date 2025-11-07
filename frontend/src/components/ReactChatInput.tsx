@@ -377,13 +377,13 @@ export default function ChatInput() {
         {!isAuthenticated ? (
           <div className="flex gap-2">
             <button
-              className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-full hover:bg-gray-100 transition-all duration-200 shadow-md hover:shadow-lg"
+              className="px-8 py-2 bg-white text-blue-600 border-2 border-blue-500 rounded-full font-semibold text-lg shadow-lg"
               onClick={() => { setLoginOpen(true); }}
             >
               Log In
             </button>
             <button
-              className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full border-2 border-blue-600 hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              className="px-8 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl border-0"
               onClick={() => { setSignupOpen(true); }}
             >
               Sign Up
@@ -393,7 +393,7 @@ export default function ChatInput() {
           <div className="flex items-center gap-2">
             {(user?.status !== 'paid') && (
               <button
-                className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-full border-2 border-blue-600 hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                className="px-8 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl border-0"
                 onClick={async () => {
                   try {
                     const { url } = await createCheckout()
