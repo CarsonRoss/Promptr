@@ -10,7 +10,74 @@ module Api
       
         # Check user payment status if authenticated, otherwise allow checkout
         if (user = current_user_from_cookie)
-          return render json: { error: 'already_paid' }, status: :conflict if user.status == 'paid'
+          if user.status == 'paid'
+            # If the user is already paid, return a Stripe Billing Portal URL instead of 409
+            begin
+              # Prefer cached Stripe customer id for the user; fallback to device.customer_id
+              cid = Rails.cache.read(["user", user.id.to_s, "stripe_customer_id"].join(':')).to_s
+              if cid.blank? && device_id.present?
+                if (dev = Device.find_by(device_id: device_id))
+                  cid = dev.stripe_customer_id.to_s
+                end
+              end
+              if cid.present?
+                portal_params = {
+                  customer: cid,
+                  return_url: default_origin
+                }
+                # Allow explicit configuration to be injected via ENV for test/prod
+                if (conf = ENV['STRIPE_BILLING_PORTAL_CONFIGURATION_ID']).present?
+                  portal_params[:configuration] = conf
+                end
+                portal = Stripe::BillingPortal::Session.create(portal_params)
+                return render json: { url: portal.url }
+              else
+                # Fallback: return a benign 200 with message to avoid breaking UI
+                return render json: { message: 'already_paid' }, status: :ok
+              end
+            rescue Stripe::InvalidRequestError => e
+              # Common when portal default configuration hasn't been set in Stripe test mode.
+              Rails.logger.warn("[Payments#checkout] Billing portal creation failed: #{e.class} #{e.message}")
+              # Fallback: attempt to create a checkout session so the user lands on Stripe
+              begin
+                success_url = ENV['STRIPE_SUCCESS_URL'].presence || default_success_url
+                cancel_url  = ENV['STRIPE_CANCEL_URL'].presence  || default_cancel_url
+                line_items = if ENV['STRIPE_PRICE_ID'].present?
+                  [{ price: ENV['STRIPE_PRICE_ID'], quantity: 1 }]
+                else
+                  amount_cents = (ENV['STRIPE_UNIT_AMOUNT'] || '499').to_i
+                  product_name = ENV['STRIPE_PRODUCT_NAME'] || 'Monthly access'
+                  currency = (ENV['STRIPE_CURRENCY'] || 'usd')
+                  [{
+                    price_data: {
+                      currency: currency,
+                      product_data: { name: product_name },
+                      unit_amount: amount_cents,
+                      recurring: { interval: 'month' }
+                    },
+                    quantity: 1
+                  }]
+                end
+                meta = { device_id: device_id }
+                meta[:user_id] = user.id
+                session = Stripe::Checkout::Session.create(
+                  mode: 'subscription',
+                  line_items: line_items,
+                  success_url: success_url_with_session(success_url),
+                  cancel_url: cancel_url,
+                  metadata: meta
+                )
+                Rails.cache.write(["device:last_checkout_session", device_id].join(':'), session.id, expires_in: 20.minutes)
+                return render json: { url: session.url }
+              rescue Stripe::StripeError => e2
+                Rails.logger.warn("[Payments#checkout] Checkout fallback failed: #{e2.class} #{e2.message}")
+                return render json: { error: 'stripe_error', message: e2.message }, status: :bad_gateway
+              end
+            rescue Stripe::StripeError => e
+              Rails.logger.warn("[Payments#checkout] Billing portal creation failed: #{e.class} #{e.message}")
+              return render json: { error: 'stripe_error', message: e.message }, status: :bad_gateway
+            end
+          end
         end
       
         success_url = ENV['STRIPE_SUCCESS_URL'].presence || default_success_url

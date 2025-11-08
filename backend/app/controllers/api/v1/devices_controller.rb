@@ -5,15 +5,20 @@ module Api
       # GET /api/v1/device/status
       def status
         device = load_or_init_device
-        render json: { paid: device.paid?, remaining_uses: device.remaining_uses }
+        user = current_user_from_cookie
+        device.ensure_guest_user!(initial_uses: 10) if user.nil?
+        paid = user&.status == 'paid'
+        render json: { paid: paid, remaining_uses: device.remaining_uses }
       end
 
       # GET /api/v1/device/reset (development/test only)
       def reset
         return head :forbidden unless Rails.env.development? || Rails.env.test?
         dev = load_or_init_device
-        dev.update!(remaining_uses: 20, paid: false)
-        render json: { ok: true, remaining_uses: dev.remaining_uses, paid: dev.paid }
+        gu = dev.ensure_guest_user!(initial_uses: 10)
+        gu.update!(remaining_uses: 10)
+        dev.update!(stripe_customer_id: nil)
+        render json: { ok: true, remaining_uses: dev.remaining_uses, paid: false }
       end
 
       private

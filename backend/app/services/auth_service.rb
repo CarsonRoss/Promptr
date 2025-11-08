@@ -12,8 +12,9 @@ class AuthService
 
   # Generate a signed JWT token for the given user id.
   # extra_claims can include additional fields (e.g., roles).
-  def self.generate_jwt(user_id:, extra_claims: {})
-    expiry_seconds = (ENV['JWT_EXPIRATION'] || 1209600).to_i # 14 days
+  def self.generate_jwt(user_id:, extra_claims: {}, expires_in: nil)
+    # Prefer explicit expires_in from caller (used in specs), otherwise ENV default (14 days)
+    expiry_seconds = expires_in.nil? ? (ENV['JWT_EXPIRATION'] || 1209600).to_i : expires_in.to_i
     issued_at = Time.now.to_i
     payload = {
       sub: user_id,

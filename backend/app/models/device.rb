@@ -41,6 +41,30 @@ class Device < ApplicationRecord
     guest_user&.decrement_uses!
     remaining_uses
   end
+
+  # Ensure a guest_user exists for this device (for anonymous usage tracking)
+  def ensure_guest_user!(initial_uses: 10)
+    return guest_user if guest_user.present?
+    self.guest_user = GuestUser.find_or_create_by(device_fingerprint: device_id) do |g|
+      g.remaining_uses = initial_uses
+    end
+    save! if changed?
+    guest_user
+  end
+  
+  def remaining_uses
+    gu_uses = guest_user&.remaining_uses
+    return gu_uses.to_i if gu_uses
+    10
+  end
+  
+  # Allow force to bypass device-level paid? check
+  def consume_trial!(force: false)
+    return remaining_uses if paid? && !force
+    ensure_guest_user!(initial_uses: 10) if guest_user.nil?
+    guest_user.decrement_uses!
+    remaining_uses
+  end
 end
 
 

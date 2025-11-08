@@ -97,6 +97,7 @@ export async function getSubscriptionStatus(signal?: AbortSignal): Promise<Subsc
   const res = await fetch(`${BASE_URL}/api/v1/subscription/status`, {
     method: 'GET',
     headers: authHeaders(),
+    credentials: 'include',
     signal,
   })
   if (!res.ok) throw new Error(`Subscription status failed: ${res.status}`)

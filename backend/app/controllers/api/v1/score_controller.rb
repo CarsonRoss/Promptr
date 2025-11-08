@@ -4,30 +4,32 @@ module Api
       before_action :load_device!
       def create
         prompt = params[:prompt].to_s
-        if prompt.strip.empty?
-          return render json: { error: 'prompt is required' }, status: :unprocessable_entity
-        end
-        if @device.exhausted?
+        return render json: { error: 'prompt is required' }, status: :unprocessable_entity if prompt.strip.empty?
+      
+        user = current_user_from_cookie
+        paid = user&.status == 'paid' # unify with status endpoint
+      
+        # Enforce paywall only for not-paid users
+        if !paid && @device.exhausted?
           return render json: { paywall: true, remaining_uses: @device.remaining_uses }, status: :payment_required
         end
-
-        # Short-circuit duplicate exact prompts per device: do not score, do not decrement
+      
         normalized = prompt.strip
         cache_key_prompt  = ["device:last_prompt", @device.device_id].join(':')
         cache_key_result  = ["device:last_result", @device.device_id].join(':')
         last_prompt = Rails.cache.read(cache_key_prompt)
+      
         if last_prompt.present? && last_prompt == normalized
           if (cached = Rails.cache.read(cache_key_result)).present?
+            @device.consume_trial!(force: true) unless paid
             return render json: cached
-          else
-            # No cached result; fall through and score
           end
         end
-
+      
         result = PromptScoringService.call(prompt)
-        # Only decrement on success
-        @device.consume_trial! unless @device.paid?
-        # Cache the last prompt/result for idempotency for a short window
+      
+        @device.consume_trial!(force: true) unless paid
+      
         Rails.cache.write(cache_key_prompt, normalized, expires_in: 10.minutes)
         Rails.cache.write(cache_key_result, result, expires_in: 10.minutes)
         render json: result
@@ -43,11 +45,9 @@ module Api
       end
 
       def anonymous_id
-        # fallback identifier if none provided; not ideal but prevents crash
         "anon-#{request.remote_ip}-#{request.user_agent.to_s[0..20]}"
       end
     end
   end
 end
-
 

@@ -34,13 +34,44 @@ RSpec.describe 'Payments API', type: :request do
         before do
           user.update!(status: 'paid')
         end
-
-        it 'returns 409 conflict' do
+        it 'returns a billing portal url instead of 409' do
+          # Simulate a cached stripe customer id for user
+          Rails.cache.write(["user", user.id.to_s, "stripe_customer_id"].join(':'), 'cus_abc', expires_in: 1.day)
+          allow(Stripe::BillingPortal::Session).to receive(:create).and_return(
+            double(url: 'https://billing.stripe.com/session/test_123')
+          )
           post "#{base_path}/checkout", params: { device_id: device_id }
-
-          expect(response).to have_http_status(:conflict)
+          expect(response).to have_http_status(:ok)
           body = JSON.parse(response.body)
-          expect(body['error']).to eq('already_paid')
+          expect(body['url']).to eq('https://billing.stripe.com/session/test_123')
+          expect(Stripe::BillingPortal::Session).to have_received(:create)
+        end
+
+        it 'falls back to checkout when billing portal is not configured' do
+          Rails.cache.write(["user", user.id.to_s, "stripe_customer_id"].join(':'), 'cus_abc', expires_in: 1.day)
+          allow(Stripe::BillingPortal::Session).to receive(:create).and_raise(
+            Stripe::InvalidRequestError.new('No configuration provided and your test mode default configuration has not been created.', 'configuration')
+          )
+          allow(Stripe::Checkout::Session).to receive(:create).and_return(
+            double(url: 'https://checkout.stripe.com/fallback', id: 'cs_fallback_123', customer: 'cus_abc')
+          )
+          post "#{base_path}/checkout", params: { device_id: device_id }
+          expect(response).to have_http_status(:ok)
+          body = JSON.parse(response.body)
+          expect(body['url']).to eq('https://checkout.stripe.com/fallback')
+          expect(Stripe::Checkout::Session).to have_received(:create)
+        end
+
+        it 'passes configuration param when STRIPE_BILLING_PORTAL_CONFIGURATION_ID is set' do
+          Rails.cache.write(["user", user.id.to_s, "stripe_customer_id"].join(':'), 'cus_abc', expires_in: 1.day)
+          stub_const('ENV', ENV.to_hash.merge('STRIPE_BILLING_PORTAL_CONFIGURATION_ID' => 'bpc_test_cfg_123'))
+          expect(Stripe::BillingPortal::Session).to receive(:create).with(
+            hash_including(customer: 'cus_abc', return_url: kind_of(String), configuration: 'bpc_test_cfg_123')
+          ).and_return(double(url: 'https://billing.stripe.com/session/test_cfg'))
+          post "#{base_path}/checkout", params: { device_id: device_id }
+          expect(response).to have_http_status(:ok)
+          body = JSON.parse(response.body)
+          expect(body['url']).to eq('https://billing.stripe.com/session/test_cfg')
         end
       end
     end
