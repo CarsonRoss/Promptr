@@ -119,7 +119,7 @@ module Llm
             return { 'score' => 0, 'reasons' => ["judge error: #{msg}"], 'raw' => raw_body }
           end
 
-          content = body.dig('choices', 0, 'message', 'content').to_s
+          content = body.dig('choices', 0, 'message', 'content').to_s.strip
           Rails.logger.info("[LLM::OpenaiClient] judge_prompt raw content: #{content.inspect}") if defined?(Rails)
 
           begin
@@ -208,7 +208,7 @@ module Llm
         status = (res.code.to_i rescue 0)
         body_str = res.body.to_s
         body = JSON.parse(body_str) rescue {}
-        content = body.dig('choices', 0, 'message', 'content').to_s
+        content = body.dig('choices', 0, 'message', 'content').to_s.strip
         elapsed = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f) - t0) * 1000.0
         Rails.logger.info("[LLM::OpenaiClient] run_prompt HTTP #{status} elapsed=#{elapsed.round}ms content_len=#{content.length}") if defined?(Rails)
         return content

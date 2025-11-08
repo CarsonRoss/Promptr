@@ -13,7 +13,7 @@ module Scorers
         threads << Thread.new do
           ti = Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f
           begin
-            out = Llm::OpenaiClient.run_prompt(text, temperature: 0.2, timeout: 30, max_retries: 1, max_tokens: 16384)
+            out = Llm::OpenaiClient.run_prompt(text, temperature: 0.2, timeout: 12, max_retries: 1, max_tokens: 16384)
             outputs[i] = out
           ensure
             ei = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) rescue Time.now.to_f) - ti) * 1000.0
@@ -99,7 +99,7 @@ module Scorers
         )
 
         # Parse JSON response
-        parsed = JSON.parse(response)
+        parsed = JSON.parse(response.to_s.strip)
         score = parsed['total_score'].to_i.clamp(0, 100)
         reasons = parsed['reasons'] || []
 
