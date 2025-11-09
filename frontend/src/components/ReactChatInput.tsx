@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import AuthModal from './AuthModal';
 import LoginModal from './LoginModal';
 import UserProfileDropdown from './UserModal';
-import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout, getSubscriptionStatus, cancelSubscription, type SubscriptionStatus, getSession, logout } from '../lib/api';
+import { scorePrompt, type ScoreResponse, createCheckout, getDeviceStatus, confirmCheckout, getSubscriptionStatus, cancelSubscription, type SubscriptionStatus, getSession, logout, getScoreProgress } from '../lib/api';
 
 export default function ChatInput() {
   const [message, setMessage] = useState('');
@@ -28,7 +28,13 @@ export default function ChatInput() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<{ status: string; email?: string } | null>(null)
   const [pendingUpgrade, setPendingUpgrade] = useState(false)
+  const [loaderStep, setLoaderStep] = useState<0 | 1 | null>(null)
   
+  // Derived payment state
+  const isPaidUser = user?.status === 'paid'
+  const isPaidDevice = paid === true
+  const isPaid = isPaidUser || isPaidDevice
+
 
   // Typewriter display states
   const [llmText, setLlmText] = useState<string>('');
@@ -190,6 +196,14 @@ export default function ChatInput() {
     const ac = new AbortController();
     abortRef.current = ac;
   
+    // progress poller scoped across try/finally
+    let progressIv: number | null = null
+    const stopProgress = () => {
+      if (progressIv) {
+        window.clearInterval(progressIv)
+        progressIv = null
+      }
+    }
     try {
       if (typeIntervalsRef.current.llm) window.clearInterval(typeIntervalsRef.current.llm);
       if (typeIntervalsRef.current.empirical) window.clearInterval(typeIntervalsRef.current.empirical);
@@ -204,18 +218,35 @@ export default function ChatInput() {
       setSuggestedText('');
   
       setIsScoring(true);
+      setLoaderStep(0);
+
+      // Set up progress polling
+      const token =
+        (globalThis.crypto && (globalThis.crypto as any).randomUUID?.()) ||
+        `req-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      progressIv = window.setInterval(async () => {
+        try {
+          const p = await getScoreProgress(token)
+          if (p && p.step === 'llm_done') {
+            setLoaderStep(1)
+            // keep polling until request finishes to handle retries; harmless
+          }
+        } catch { /* ignore transient */ }
+      }, 300)
   
       let res: ScoreResponse;
       try {
-        res = await scorePrompt(promptToUse, ac.signal);
+        res = await scorePrompt(promptToUse, ac.signal, token);
       } catch (err: any) {
         if (err && err.status === 402) {
           setIsScoring(false);
           setPaywallOpen(true);
           setPaid(false);
           setRemainingUses(err.body?.remaining_uses ?? 0);
+          stopProgress()
           return;
         }
+        stopProgress()
         throw err;
       }
   
@@ -224,6 +255,7 @@ export default function ChatInput() {
 
       setLlmScore(l);
       setEmpiricalScore(e);
+      setLoaderStep(1);
 
       setLlmReasons(res.llm?.reasons ?? null);
       setLlmRaw(res.llm?.raw ?? null);
@@ -250,6 +282,7 @@ export default function ChatInput() {
       } catch {}
   
       setIsScoring(false);
+      stopProgress()
   
       const llmR = joinReasons(res.llm?.reasons);
       const empR = joinReasons(res.empirical?.reasons);
@@ -263,6 +296,8 @@ export default function ChatInput() {
       // ignore for now
     } finally {
       setIsScoring(false);
+      stopProgress()
+      setLoaderStep(null);
     }
   }
 
@@ -391,33 +426,46 @@ export default function ChatInput() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            {(user?.status !== 'paid') && (
-              <button
-                className="px-8 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl border-0"
-                onClick={async () => {
-                  try {
-                    const { url } = await createCheckout()
-                    if (!url) throw new Error('Missing checkout URL')
-                    window.location.href = url
-                  } catch (e) {
-                    showFlash('Upgrade failed. Please try again.')
-                    console.error('Upgrade error:', e)
-                  }
-                }}
-              >
-                Upgrade Now
-              </button>
-            )}
             <UserProfileDropdown userEmail={user?.email || ''} embedded />
           </div>
         )}
       </div>
+
+      {/* Top-center Upgrade button (for guests or unpaid users) */}
+      {!isPaid && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+          <button
+            className="pointer-events-auto px-8 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl border-0"
+            onClick={async () => {
+              try {
+                if (!isAuthenticated) {
+                  setPendingUpgrade(true)
+                  setSignupOpen(true)
+                  return
+                }
+                if (isPaid) {
+                  showFlash('You are already subscribed')
+                  return
+                }
+                const { url } = await createCheckout()
+                if (!url) throw new Error('Missing checkout URL')
+                window.location.href = url
+              } catch (e) {
+                showFlash('Upgrade failed. Please try again.')
+                console.error('Upgrade error:', e)
+              }
+            }}
+          >
+            Upgrade Now
+          </button>
+        </div>
+      )}
       <div className="w-full max-w-5xl relative flex gap-8 pt-6">
         {/* Flash area */}
         <div id="flash-root" className="absolute -top-8 left-1/2 -translate-x-1/2"></div>
 
         {/* Top-centered rings (no panel background) */}
-        <div className="w-full absolute left-1/2 -translate-x-1/2 top-2 flex justify-center items-end gap-8 pointer-events-none">
+        <div className="w-full absolute left-1/2 -translate-x-1/2 top-16 flex justify-center items-end gap-8 pointer-events-none">
           <div className="flex flex-col items-center transform translate-y-1 pointer-events-auto">
             <ScoreRing label="" value={llmScore} loading={isScoring} size={72} help={"Uses GPT-4o-mini to evaluate prompt quality based on clarity, specificity, feasibility, and completeness criteria."} />
             <div className="mt-2 text-[10px] uppercase tracking-wide text-slate-500 text-center w-full">LLM</div>
@@ -433,7 +481,7 @@ export default function ChatInput() {
         </div>
 
         {/* Main content (no modal/card wrapper) */}
-        <div className="flex-1 mt-36">
+        <div className="flex-1 mt-44">
 
           {/* Input with inline send */}
           <div className="p-4 flex items-start gap-6">
@@ -443,7 +491,7 @@ export default function ChatInput() {
                 value={message}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
                 onKeyDown={onKeyDown}
-                placeholder="Type Anything..."
+                placeholder="Enter a prompt to be graded..."
                 rows={1}
                 className="w-full resize-none overflow-hidden rounded-xl bg-slate-100/60 border border-slate-200 focus:outline-none text-slate-900 placeholder-slate-400 text-base leading-relaxed pr-12 pl-4 pt-2 pb-6"
                 style={{ minHeight: '36px' }}
@@ -465,7 +513,7 @@ export default function ChatInput() {
           {/* Loader directly under input, left-aligned */}
           {isScoring && (
             <div className="px-4 pt-0">
-              <ThreeDotLoader />
+              <SlotMachineLoader step={(loaderStep ?? 0)} />
             </div>
           )}
 
@@ -478,6 +526,13 @@ export default function ChatInput() {
                   <button
                     onClick={async () => {
                       try {
+                        // If not authenticated, take the user through account creation first.
+                        if (!isAuthenticated) {
+                          setPendingUpgrade(true)
+                          setSignupOpen(true)
+                          return
+                        }
+                        // Otherwise proceed directly to checkout.
                         const { url } = await createCheckout()
                         window.location.href = url
                       } catch {}
@@ -551,6 +606,11 @@ export default function ChatInput() {
           // If user came from upgrade flow and is now authenticated, proceed to checkout
           if (pendingUpgrade && s.authenticated) {
             setPendingUpgrade(false)
+            // If already paid after login, do NOT send to checkout
+            if (s.user?.status === 'paid') {
+              showFlash('You are already subscribed')
+              return
+            }
             setIsUpgrading(true)
             try {
               const { url } = await createCheckout()
@@ -573,6 +633,11 @@ export default function ChatInput() {
           setUser(s.user || null)
           if (pendingUpgrade && s.authenticated) {
             setPendingUpgrade(false)
+            // If already paid after verification, do NOT send to checkout
+            if (s.user?.status === 'paid') {
+              showFlash('You are already subscribed')
+              return
+            }
             setIsUpgrading(true)
             try {
               const { url } = await createCheckout()
@@ -587,8 +652,32 @@ export default function ChatInput() {
           }
         } catch {}
       }} />
+      <AppFooter />
     </div>
   );
+}
+
+// Footer
+function AppFooter() {
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-blue-600 text-white">
+      <div className="max-w-5xl mx-auto py-3 flex items-center justify-center gap-10">
+        <button
+          className="font-medium"
+          onClick={() => { window.location.hash = '#/faq' }}
+        >
+          FAQ
+        </button>
+        <a
+          className="font-medium"
+          style={{ color: '#ffffff' }}
+          href="mailto:promptexto@gmail.com"
+        >
+          Contact Us
+        </a>
+      </div>
+    </div>
+  )
 }
 
 function ScoreRing({ label, value, loading, size = 56, color, help }: { 
@@ -692,6 +781,44 @@ function ThreeDotLoader() {
       <div className="bg-gray-400 rounded-full animate-bounce" style={{ width: size, height: size, animationDelay: '0ms', animationDuration: '600ms' }}></div>
       <div className="bg-gray-400 rounded-full animate-bounce" style={{ width: size, height: size, animationDelay: '150ms', animationDuration: '600ms' }}></div>
       <div className="bg-gray-400 rounded-full animate-bounce" style={{ width: size, height: size, animationDelay: '300ms', animationDuration: '600ms' }}></div>
+    </div>
+  );
+}
+
+function SlotMachineLoader({ step }: { step: 0 | 1 }) {
+  const rowHeight = 32; // px
+  const containerStyle: React.CSSProperties = {
+    textAlign: 'left',
+  };
+  const textContainerStyle: React.CSSProperties = {
+    height: `${rowHeight}px`,
+    overflow: 'hidden',
+    position: 'relative',
+    display: 'inline-block',
+  };
+  const slotStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    transform: `translateY(-${step * rowHeight}px)`,
+    transition: 'transform 300ms linear',
+  };
+  const itemStyle: React.CSSProperties = {
+    height: `${rowHeight}px`,
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '14px',
+    color: '#64748b',
+    fontWeight: 500,
+    whiteSpace: 'nowrap',
+  };
+  return (
+    <div style={containerStyle} className="ml-4 py-2">
+      <div style={textContainerStyle}>
+        <div style={slotStyle}>
+          <div style={itemStyle}>Generating LLM Insights</div>
+          <div style={itemStyle}>Generating Empirical Insights</div>
+        </div>
+      </div>
     </div>
   );
 }

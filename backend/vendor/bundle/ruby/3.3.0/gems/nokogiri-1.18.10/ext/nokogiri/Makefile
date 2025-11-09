@@ -13,12 +13,12 @@ NULLCMD = :
 #### Start of system configuration section. ####
 
 srcdir = .
-topdir = /Users/carsonross/.rbenv/versions/3.3.5/include/ruby-3.3.0
+topdir = /Users/carsonross/.rvm/rubies/ruby-3.3.5/include/ruby-3.3.0
 hdrdir = $(topdir)
-arch_hdrdir = /Users/carsonross/.rbenv/versions/3.3.5/include/ruby-3.3.0/arm64-darwin24
+arch_hdrdir = /Users/carsonross/.rvm/rubies/ruby-3.3.5/include/ruby-3.3.0/arm64-darwin24
 PATH_SEPARATOR = :
 VPATH = $(srcdir):$(arch_hdrdir)/ruby:$(hdrdir)/ruby
-prefix = $(DESTDIR)/Users/carsonross/.rbenv/versions/3.3.5
+prefix = $(DESTDIR)/Users/carsonross/.rvm/rubies/ruby-3.3.5
 rubysitearchprefix = $(rubylibprefix)/$(sitearch)
 rubyarchprefix = $(rubylibprefix)/$(arch)
 rubylibprefix = $(libdir)/$(RUBY_BASE_NAME)
@@ -66,8 +66,8 @@ archdir = $(rubyarchdir)
 
 
 CC_WRAPPER = 
-CC = clang
-CXX = clang++
+CC = gcc
+CXX = g++
 LIBRUBY = $(LIBRUBY_SO)
 LIBRUBY_A = lib$(RUBY_SO_NAME)-static.a
 LIBRUBYARG_SHARED = -l$(RUBY_SO_NAME)
@@ -85,13 +85,13 @@ debugflags = -ggdb3
 warnflags = -Wall -Wextra -Wextra-tokens -Wdeprecated-declarations -Wdivision-by-zero -Wdiv-by-zero -Wimplicit-function-declaration -Wimplicit-int -Wpointer-arith -Wshorten-64-to-32 -Wwrite-strings -Wold-style-definition -Wmissing-noreturn -Wno-cast-function-type -Wno-constant-logical-operand -Wno-long-long -Wno-missing-field-initializers -Wno-overlength-strings -Wno-parentheses-equality -Wno-self-assign -Wno-tautological-compare -Wno-unused-parameter -Wno-unused-value -Wunused-variable -Wmisleading-indentation -Wundef
 cppflags = 
 CCDLFLAGS = -fno-common
-CFLAGS   = $(CCDLFLAGS) $(cflags) -fno-common -pipe -std=c99 -Wno-declaration-after-statement -O2 -g -Winline -Wmissing-noreturn -Wno-unknown-warning-option $(ARCH_FLAG)
+CFLAGS   = $(CCDLFLAGS) -O3 -I/opt/homebrew/opt/libyaml/include -I/opt/homebrew/opt/libksba/include -I/opt/homebrew/opt/readline/include -I/opt/homebrew/opt/zlib/include -I/opt/homebrew/opt/openssl@3/include $(cflags) -fno-common -pipe -std=c99 -Wno-declaration-after-statement -O2 -g -Winline -Wmissing-noreturn -Wno-unknown-warning-option $(ARCH_FLAG)
 INCFLAGS = -I. -I$(arch_hdrdir) -I$(hdrdir)/ruby/backward -I$(hdrdir) -I$(srcdir)
 DEFS     = 
 CPPFLAGS = -DHAVE_ICONV_H -DHAVE_XMLPARSEDOC -DHAVE_XSLTPARSESTYLESHEETDOC -DHAVE_EXSLTFUNCREGISTER -DHAVE_GUMBO_PARSE_WITH_OPTIONS -DHAVE_XMLCTXTSETOPTIONS -DHAVE_XMLSWITCHENCODINGNAME -DHAVE_RB_CATEGORY_WARNING -I/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/include/libxml2 -I/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/include -I/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/include/libxml2 -I/opt/homebrew/opt/libressl/include -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE -D_DARWIN_UNLIMITED_SELECT -D_REENTRANT $(DEFS) $(cppflags) -I/opt/homebrew/opt/libressl/include -DNOKOGIRI_PACKAGED_LIBRARIES -DNOKOGIRI_LIBXML2_PATCHES="\"0001-Remove-script-macro-support.patch 0002-Update-entities-to-remove-handling-of-ssi.patch 0009-allow-wildcard-namespaces.patch 0010-update-config.guess-and-config.sub-for-libxml2.patch 0011-rip-out-libxml2-s-libc_single_threaded-support.patch 0019-xpath-Use-separate-static-hash-table-for-standard-fu.patch\"" -DNOKOGIRI_LIBXSLT_PATCHES="\"0001-update-config.guess-and-config.sub-for-libxslt.patch\"" -I/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ext/nokogiri/ports/arm64-darwin24/libgumbo/1.0.0-nokogiri/include -DNOKOGIRI_OTHER_LIBRARY_VERSIONS="\"libgumbo:1.0.0-nokogiri\""
 CXXFLAGS = $(CCDLFLAGS) -fdeclspec $(ARCH_FLAG)
-ldflags  = -L. -L/opt/homebrew/opt/libressl/lib -fstack-protector-strong -L/opt/homebrew/opt/gmp/lib -L/opt/homebrew/opt/libressl/lib
-dldflags = -L/opt/homebrew/opt/libressl/lib -L/opt/homebrew/opt/gmp/lib -Wl,-undefined,dynamic_lookup 
+ldflags  = -L. -L/opt/homebrew/opt/libyaml/lib -L/opt/homebrew/opt/libksba/lib -L/opt/homebrew/opt/readline/lib -L/opt/homebrew/opt/zlib/lib -L/opt/homebrew/opt/openssl@3/lib -fstack-protector-strong -L/opt/homebrew/opt/libressl/lib
+dldflags = -L/opt/homebrew/opt/libyaml/lib -L/opt/homebrew/opt/libksba/lib -L/opt/homebrew/opt/readline/lib -L/opt/homebrew/opt/zlib/lib -L/opt/homebrew/opt/openssl@3/lib -Wl,-undefined,dynamic_lookup 
 ARCH_FLAG = -arch arm64
 DLDFLAGS = $(ldflags) $(dldflags) $(ARCH_FLAG)
 LDSHARED = $(CC) -dynamic -bundle
@@ -117,8 +117,8 @@ ruby_headers = $(hdrdir)/ruby.h $(hdrdir)/ruby/backward.h $(hdrdir)/ruby/ruby.h 
 RM = rm -f
 RM_RF = rm -fr
 RMDIRS = rmdir --ignore-fail-on-non-empty -p
-MAKEDIRS = /opt/homebrew/opt/coreutils/libexec/gnubin/mkdir -p
-INSTALL = /opt/homebrew/opt/coreutils/libexec/gnubin/install -c
+MAKEDIRS = /opt/homebrew/opt/coreutils/bin/gmkdir -p
+INSTALL = /opt/homebrew/opt/coreutils/bin/ginstall -c
 INSTALL_PROG = $(INSTALL) -m 0755
 INSTALL_DATA = $(INSTALL) -m 644
 COPY = cp
@@ -127,8 +127,8 @@ TOUCH = exit >
 #### End of system configuration section. ####
 
 preload = 
-libpath = . $(libdir) /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/lib /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/lib /opt/homebrew/Cellar/xz/5.8.1/lib /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ext/nokogiri/ports/arm64-darwin24/libgumbo/1.0.0-nokogiri/lib
-LIBPATH =  -L. -L$(libdir) -L/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/lib -L/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/lib -L/opt/homebrew/Cellar/xz/5.8.1/lib -L/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ext/nokogiri/ports/arm64-darwin24/libgumbo/1.0.0-nokogiri/lib
+libpath = . $(libdir) /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/lib /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/lib /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ext/nokogiri/ports/arm64-darwin24/libgumbo/1.0.0-nokogiri/lib
+LIBPATH =  -L. -L$(libdir) -L/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/lib -L/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/lib -L/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ext/nokogiri/ports/arm64-darwin24/libgumbo/1.0.0-nokogiri/lib
 DEFFILE = 
 
 CLEANFILES = mkmf.log
@@ -139,7 +139,7 @@ extout =
 extout_prefix = 
 target_prefix = /nokogiri
 LOCAL_LIBS = 
-LIBS = $(LIBRUBYARG_SHARED) /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/lib/libexslt.a -liconv -llzma -lz /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/lib/libxml2.a /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/lib/libxslt.a -liconv -llzma -lz /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/lib/libxml2.a -llzma /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ext/nokogiri/ports/arm64-darwin24/libgumbo/1.0.0-nokogiri/lib/libgumbo.a -lpthread  
+LIBS = $(LIBRUBYARG_SHARED) /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/lib/libexslt.a -liconv -lz /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/lib/libxml2.a /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxslt/1.1.43/lib/libxslt.a -liconv -lz /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ports/arm64-darwin24/libxml2/2.13.9/lib/libxml2.a -llzma /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nokogiri-1.18.10/ext/nokogiri/ports/arm64-darwin24/libgumbo/1.0.0-nokogiri/lib/libgumbo.a -lpthread  
 ORIG_SRCS = gumbo.c html4_document.c html4_element_description.c html4_entity_lookup.c html4_sax_parser.c html4_sax_parser_context.c html4_sax_push_parser.c libxml2_polyfill.c nokogiri.c test_global_handlers.c xml_attr.c xml_attribute_decl.c xml_cdata.c xml_comment.c xml_document.c xml_document_fragment.c xml_dtd.c xml_element_content.c xml_element_decl.c xml_encoding_handler.c xml_entity_decl.c xml_entity_reference.c xml_namespace.c xml_node.c xml_node_set.c xml_processing_instruction.c xml_reader.c xml_relax_ng.c xml_sax_parser.c xml_sax_parser_context.c xml_sax_push_parser.c xml_schema.c xml_syntax_error.c xml_text.c xml_xpath_context.c xslt_stylesheet.c
 SRCS = $(ORIG_SRCS) 
 OBJS = gumbo.o html4_document.o html4_element_description.o html4_entity_lookup.o html4_sax_parser.o html4_sax_parser_context.o html4_sax_push_parser.o libxml2_polyfill.o nokogiri.o test_global_handlers.o xml_attr.o xml_attribute_decl.o xml_cdata.o xml_comment.o xml_document.o xml_document_fragment.o xml_dtd.o xml_element_content.o xml_element_decl.o xml_encoding_handler.o xml_entity_decl.o xml_entity_reference.o xml_namespace.o xml_node.o xml_node_set.o xml_processing_instruction.o xml_reader.o xml_relax_ng.o xml_sax_parser.o xml_sax_parser_context.o xml_sax_push_parser.o xml_schema.o xml_syntax_error.o xml_text.o xml_xpath_context.o xslt_stylesheet.o

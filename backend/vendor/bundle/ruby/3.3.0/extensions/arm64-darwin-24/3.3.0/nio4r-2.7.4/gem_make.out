@@ -1,5 +1,5 @@
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nio4r-2.7.4/ext/nio4r
-/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+/Users/carsonross/.rvm/rubies/ruby-3.3.5/bin/ruby extconf.rb
 checking for unistd.h... yes
 checking for rb_io_descriptor()... yes
 checking for linux/aio_abi.h... no
@@ -14,10 +14,10 @@ checking for sys/resource.h... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nio4r-2.7.4/ext/nio4r
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-isgfu0 sitelibdir\=./.gem.20251025-30080-isgfu0 clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-n53ftb sitelibdir\=./.gem.20251109-51760-n53ftb clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nio4r-2.7.4/ext/nio4r
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-isgfu0 sitelibdir\=./.gem.20251025-30080-isgfu0
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-n53ftb sitelibdir\=./.gem.20251109-51760-n53ftb
 compiling bytebuffer.c
 compiling monitor.c
 compiling nio4r_ext.c
@@ -360,8 +360,8 @@ compiling selector.c
 linking shared-object nio4r_ext.bundle
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nio4r-2.7.4/ext/nio4r
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-isgfu0 sitelibdir\=./.gem.20251025-30080-isgfu0 install
-/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 nio4r_ext.bundle ./.gem.20251025-30080-isgfu0
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-n53ftb sitelibdir\=./.gem.20251109-51760-n53ftb install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 nio4r_ext.bundle ./.gem.20251109-51760-n53ftb
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/nio4r-2.7.4/ext/nio4r
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-isgfu0 sitelibdir\=./.gem.20251025-30080-isgfu0 clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-n53ftb sitelibdir\=./.gem.20251109-51760-n53ftb clean

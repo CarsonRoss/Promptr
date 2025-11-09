@@ -45,7 +45,7 @@ libdir      = ${exec_prefix}/lib
 INSTALL = /opt/homebrew/opt/coreutils/libexec/gnubin/install
 AR = ar
 AR.flags = cr
-CC = clang
+CC = gcc
 
 
 ENABLE_LIB_SHARED = 0
@@ -100,7 +100,7 @@ AS_AUTO_DEF = $(TOP)/auto.def
 # Shell commands to re-run $(TOP)/configure with the same args it was
 # invoked with to produce this makefile.
 #
-AS_AUTORECONFIG = cd "/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3/tmp/arm64-apple-darwin24.6.0/ports/sqlite3/3.50.4/sqlite-autoconf-3500400" && ./configure --host=arm64-apple-darwin24.6.0 --enable-static --disable-shared --enable-fts5 LDFLAGS=-L/opt/homebrew/opt/libressl/lib CPPFLAGS=-I/opt/homebrew/opt/libressl/include CC=clang "CFLAGS=-fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -DSQLITE_ENABLE_DBPAGE_VTAB=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1" --prefix=/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ports/arm64-apple-darwin24.6.0/sqlite3/3.50.4
+AS_AUTORECONFIG = cd "/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3/tmp/arm64-apple-darwin24.6.0/ports/sqlite3/3.50.4/sqlite-autoconf-3500400" && ./configure --host=arm64-apple-darwin24.6.0 --enable-static --disable-shared --enable-fts5 LDFLAGS=-L/opt/homebrew/opt/libressl/lib CPPFLAGS=-I/opt/homebrew/opt/libressl/include CC=gcc "CFLAGS=-fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -DSQLITE_ENABLE_DBPAGE_VTAB=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1" --prefix=/Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ports/arm64-apple-darwin24.6.0/sqlite3/3.50.4
 Makefile: $(TOP)/Makefile.in $(AS_AUTO_DEF)
 	$(AS_AUTORECONFIG)
 	@touch $@

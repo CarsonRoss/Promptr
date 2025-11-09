@@ -1,5 +1,5 @@
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3
-/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+/Users/carsonross/.rvm/rubies/ruby-3.3.5/bin/ruby extconf.rb
 Building sqlite3-ruby using packaged sqlite3.
 Extracting sqlite-autoconf-3500400.tar.gz into tmp/arm64-apple-darwin24.6.0/ports/sqlite3/3.50.4... OK
 Running 'configure' for sqlite3 3.50.4... OK
@@ -31,10 +31,10 @@ checking for sqlite3_uint64 in sqlite3.h... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-5vdi3b sitelibdir\=./.gem.20251025-30080-5vdi3b clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-70031-ef6dgz sitelibdir\=./.gem.20251109-70031-ef6dgz clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-5vdi3b sitelibdir\=./.gem.20251025-30080-5vdi3b
+make DESTDIR\= sitearchdir\=./.gem.20251109-70031-ef6dgz sitelibdir\=./.gem.20251109-70031-ef6dgz
 compiling aggregator.c
 compiling backup.c
 compiling database.c
@@ -45,8 +45,8 @@ linking shared-object sqlite3/sqlite3_native.bundle
 ld: warning: ignoring duplicate libraries: '-lsqlite3'
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-5vdi3b sitelibdir\=./.gem.20251025-30080-5vdi3b install
-/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 sqlite3_native.bundle ./.gem.20251025-30080-5vdi3b/sqlite3
+make DESTDIR\= sitearchdir\=./.gem.20251109-70031-ef6dgz sitelibdir\=./.gem.20251109-70031-ef6dgz install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 sqlite3_native.bundle ./.gem.20251109-70031-ef6dgz/sqlite3
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-5vdi3b sitelibdir\=./.gem.20251025-30080-5vdi3b clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-70031-ef6dgz sitelibdir\=./.gem.20251109-70031-ef6dgz clean

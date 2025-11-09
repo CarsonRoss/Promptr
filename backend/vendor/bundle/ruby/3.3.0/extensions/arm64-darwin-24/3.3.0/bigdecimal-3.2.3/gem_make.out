@@ -1,5 +1,5 @@
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+/Users/carsonross/.rvm/rubies/ruby-3.3.5/bin/ruby extconf.rb
 checking for __builtin_clz()... yes
 checking for __builtin_clzl()... yes
 checking for __builtin_clzll()... yes
@@ -20,17 +20,17 @@ checking for RB_WARN_CATEGORY_DEPRECATED in ruby.h... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-705lu2 sitelibdir\=./.gem.20251025-30080-705lu2 clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-yaiufj sitelibdir\=./.gem.20251109-51760-yaiufj clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-705lu2 sitelibdir\=./.gem.20251025-30080-705lu2
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-yaiufj sitelibdir\=./.gem.20251109-51760-yaiufj
 compiling bigdecimal.c
 compiling missing.c
 linking shared-object bigdecimal.bundle
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-705lu2 sitelibdir\=./.gem.20251025-30080-705lu2 install
-/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 bigdecimal.bundle ./.gem.20251025-30080-705lu2
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-yaiufj sitelibdir\=./.gem.20251109-51760-yaiufj install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 bigdecimal.bundle ./.gem.20251109-51760-yaiufj
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/bigdecimal-3.2.3/ext/bigdecimal
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-705lu2 sitelibdir\=./.gem.20251025-30080-705lu2 clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-yaiufj sitelibdir\=./.gem.20251109-51760-yaiufj clean

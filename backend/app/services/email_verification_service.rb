@@ -26,7 +26,19 @@ class EmailVerificationService
         to = SendGrid::Email.new(email: user.email)
         subject = 'Verify your email'
         text = "Your verification code is: #{code}\n\nOr verify by clicking: #{verification_link}"
-        html = "<p>Your verification code is: <strong>#{code}</strong></p><p>Or verify by clicking the link below:</p><p><a href=\"#{verification_link}\">Verify Email</a></p>"
+        # Prefer a fully-qualified public URL for the logo (email clients cannot read local paths)
+        asset_host = ENV['ASSET_HOST'].to_s.presence || ENV['FRONTEND_URL'].to_s.presence
+        logo_url   = ENV['EMAIL_LOGO_URL'].to_s.presence || (asset_host ? "#{asset_host}/images/logo-transparent.png" : nil)
+        html = <<~HTML
+            <div style="text-align: center;">
+              #{logo_url ? "<img src=\"#{logo_url}\" alt=\"Promptexto Logo\" style=\"width: 120px; margin-bottom: 20px;\" />" : ""}
+              <p><strong style='font-size: 24px;'>Hello, Welcome to Promptexto</strong></p>
+              <p>Your Promptexto verification code is: <strong>#{code}</strong></p>
+              <p>Or verify by clicking the link below:</p>
+              <p><a href="#{verification_link}">Verify Email</a></p>
+              <p>Got questions? Contact us at <a href='mailto:promptexto@gmail.com'>promptexto@gmail.com</a></p>
+            </div>
+        HTML
 
         content = [
             SendGrid::Content.new(type: 'text/plain', value: text),
@@ -58,22 +70,41 @@ class EmailVerificationService
     # Caches under key: "email:verify_code:<email>"
     def self.send_code_to_email(email)
         Rails.logger.info("[EmailVerificationService] SEND CODE email=#{email}")
-        api_key = ENV['SENDGRID_API_KEY'].to_s
+        api_key   = ENV['SENDGRID_API_KEY'].to_s
         from_email = ENV['SENDGRID_FROM_EMAIL'].presence || 'no-reply@example.com'
+      
         unless api_key.present?
-            Rails.logger.error('[EmailVerificationService] SENDGRID_API_KEY missing')
-            return false
+          Rails.logger.error('[EmailVerificationService] SENDGRID_API_KEY missing')
+          return false
         end
+      
         code = format('%06d', SecureRandom.random_number(1_000_000))
         cache_key = ["email:verify_code", email.to_s.downcase.strip].join(':')
         Rails.cache.write(cache_key, code, expires_in: 10.minutes)
-
+      
         from = SendGrid::Email.new(email: from_email)
-        to = SendGrid::Email.new(email: email)
-        subject = 'Your verification code'
-        text = "Your verification code is: #{code}"
-        html = "<p>Your verification code is: <strong>#{code}</strong></p>"
-
+        to   = SendGrid::Email.new(email: email)
+        subject = 'Verify your Email'
+        text    = "Your verification code is: #{code}"
+      
+        # Use a public https URL for your logo
+        logo_url = ENV['EMAIL_LOGO_URL'].presence ||
+                   "#{ENV['ASSET_HOST']}/images/logo-transparent.png"
+      
+        html = <<~HTML
+          <div style="text-align: center; font-family: Arial, sans-serif; color: #333;">
+            #{logo_url ? "<img src=\"#{logo_url}\" alt=\"Promptexto Logo\" style=\"width: 120px; margin-bottom: 20px;\" />" : ""}
+            <p><strong style="font-size: 24px;">Hello, Welcome to Promptexto</strong></p>
+            <p>Your Promptexto verification code is: <strong>#{code}</strong></p>
+            <p style="font-size: 14px; color: #555;">
+              Got questions? Contact us at
+              <a href="mailto:promptexto@gmail.com" style="color: #1a0dab;">
+                promptexto@gmail.com
+              </a>
+            </p>
+          </div>
+        HTML
+      
         mail = SendGrid::Mail.new
         mail.from = from
         mail.subject = subject
@@ -81,15 +112,16 @@ class EmailVerificationService
         personalization.add_to(to)
         mail.add_personalization(personalization)
         mail.add_content(SendGrid::Content.new(type: 'text/plain', value: text))
-        mail.add_content(SendGrid::Content.new(type: 'text/html', value: html))
-
+        mail.add_content(SendGrid::Content.new(type: 'text/html',  value: html))
+      
         sg = SendGrid::API.new(api_key: api_key)
         res = sg.client.mail._('send').post(request_body: mail.to_json)
         code_i = res.status_code.to_i
         return true if code_i >= 200 && code_i < 300
+      
         Rails.logger.error("[EmailVerificationService] send_code_to_email non-2xx status=#{code_i} body=#{res.body}")
         false
-    rescue => e
+      rescue => e
         Rails.logger.error("[EmailVerificationService] send_code_to_email error: #{e.class} #{e.message}")
         false
     end

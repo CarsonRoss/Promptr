@@ -7,10 +7,9 @@ module Api
         return render json: { error: 'prompt is required' }, status: :unprocessable_entity if prompt.strip.empty?
       
         user = current_user_from_cookie
-        paid = user&.status == 'paid' # unify with status endpoint
-      
-        # Enforce paywall only for not-paid users
-        if !paid && @device.exhausted?
+        paid = user&.status == 'paid' # unify with status endpoint (user-based)
+        # Enforce paywall for unpaid users strictly by remaining_uses to avoid device-level paid? mismatches
+        if !paid && @device.remaining_uses <= 0
           return render json: { paywall: true, remaining_uses: @device.remaining_uses }, status: :payment_required
         end
       
@@ -26,13 +25,22 @@ module Api
           end
         end
       
-        result = PromptScoringService.call(prompt)
+        progress_token = params[:progress_token].to_s.presence
+        result = PromptScoringService.call(prompt, progress_token: progress_token)
       
         @device.consume_trial!(force: true) unless paid
       
         Rails.cache.write(cache_key_prompt, normalized, expires_in: 10.minutes)
         Rails.cache.write(cache_key_result, result, expires_in: 10.minutes)
         render json: result
+      end
+
+      # GET /api/v1/score/progress?token=uuid
+      def progress
+        token = params[:token].to_s
+        return render json: { step: nil } if token.blank?
+        data = Rails.cache.read(["score:progress", token].join(':'))
+        render json: (data || { step: nil })
       end
 
       private

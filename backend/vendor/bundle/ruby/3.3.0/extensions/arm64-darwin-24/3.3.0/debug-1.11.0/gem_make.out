@@ -1,19 +1,19 @@
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
-/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+/Users/carsonross/.rvm/rubies/ruby-3.3.5/bin/ruby extconf.rb
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-6vctxq sitelibdir\=./.gem.20251025-30080-6vctxq clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-356rz8 sitelibdir\=./.gem.20251109-51760-356rz8 clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-6vctxq sitelibdir\=./.gem.20251025-30080-6vctxq
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-356rz8 sitelibdir\=./.gem.20251109-51760-356rz8
 compiling debug.c
 compiling iseq_collector.c
 linking shared-object debug/debug.bundle
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-6vctxq sitelibdir\=./.gem.20251025-30080-6vctxq install
-/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 debug.bundle ./.gem.20251025-30080-6vctxq/debug
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-356rz8 sitelibdir\=./.gem.20251109-51760-356rz8 install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 debug.bundle ./.gem.20251109-51760-356rz8/debug
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-6vctxq sitelibdir\=./.gem.20251025-30080-6vctxq clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-356rz8 sitelibdir\=./.gem.20251109-51760-356rz8 clean

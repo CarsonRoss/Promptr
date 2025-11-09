@@ -24,6 +24,15 @@ describe('api.ts', () => {
     expect(opts.credentials).toBe('include')
     expect(opts.method).toBe('GET')
   })
+
+  it('scorePrompt includes credentials: include', async () => {
+    const { scorePrompt } = await importApi()
+    await scorePrompt('hello')
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    const [, opts] = (global.fetch as any).mock.calls[0]
+    expect(opts.credentials).toBe('include')
+    expect(opts.method).toBe('POST')
+  })
 })
 
 

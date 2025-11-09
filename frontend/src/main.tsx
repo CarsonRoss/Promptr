@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import ChatInput from './components/ReactChatInput.tsx'
 import ManageSubscription from './components/ManageSubscription.tsx'
+import FaqPage from './components/FaqPage.tsx'
 import './style.css'
 
 function AppRouter() {
@@ -15,6 +16,9 @@ function AppRouter() {
 
   if (route.startsWith('#/manage-subscription')) {
     return <ManageSubscription />
+  }
+  if (route.startsWith('#/faq')) {
+    return <FaqPage />
   }
   return <ChatInput />
 }

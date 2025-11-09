@@ -3,7 +3,7 @@ Host System...aarch64-apple-darwin24.6.0
 Build System...aarch64-apple-darwin24.6.0
 Source dir = /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3/tmp/arm64-apple-darwin24.6.0/ports/sqlite3/3.50.4/sqlite-autoconf-3500400
 Build dir  = /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/sqlite3-2.7.4/ext/sqlite3/tmp/arm64-apple-darwin24.6.0/ports/sqlite3/3.50.4/sqlite-autoconf-3500400
-C compiler... clang -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -DSQLITE_ENABLE_DBPAGE_VTAB=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1 -I/opt/homebrew/opt/libressl/include
+C compiler... gcc -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -DSQLITE_ENABLE_DBPAGE_VTAB=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1 -I/opt/homebrew/opt/libressl/include
 C++ compiler...  -fPIC -O2 -fvisibility=hidden -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1 -DSQLITE_USE_URI=1 -DSQLITE_ENABLE_DBPAGE_VTAB=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1 -I/opt/homebrew/opt/libressl/include
 Build C compiler...cc
 Checking for stdlib.h...ok

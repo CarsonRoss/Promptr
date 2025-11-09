@@ -1,15 +1,15 @@
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/prism-1.5.1/ext/prism
-/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+/Users/carsonross/.rvm/rubies/ruby-3.3.5/bin/ruby extconf.rb
 checking for prism.h in /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/prism-1.5.1/include... yes
 checking for prism/extension.h in /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/prism-1.5.1/ext... yes
 checking for whether -fvisibility=hidden is accepted as CFLAGS... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-kfgolf sitelibdir\=./.gem.20251025-30080-kfgolf clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-eszml8 sitelibdir\=./.gem.20251109-51760-eszml8 clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-kfgolf sitelibdir\=./.gem.20251025-30080-kfgolf
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-eszml8 sitelibdir\=./.gem.20251109-51760-eszml8
 compiling api_node.c
 compiling api_pack.c
 compiling extension.c
@@ -37,8 +37,8 @@ compiling ./../../src/util/pm_strpbrk.c
 linking shared-object prism/prism.bundle
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-kfgolf sitelibdir\=./.gem.20251025-30080-kfgolf install
-/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 prism.bundle ./.gem.20251025-30080-kfgolf/prism
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-eszml8 sitelibdir\=./.gem.20251109-51760-eszml8 install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 prism.bundle ./.gem.20251109-51760-eszml8/prism
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/prism-1.5.1/ext/prism
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-kfgolf sitelibdir\=./.gem.20251025-30080-kfgolf clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-eszml8 sitelibdir\=./.gem.20251109-51760-eszml8 clean

@@ -1,5 +1,5 @@
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/io-console-0.8.1/ext/io/console
-/Users/carsonross/.rbenv/versions/3.3.5/bin/ruby extconf.rb
+/Users/carsonross/.rvm/rubies/ruby-3.3.5/bin/ruby extconf.rb
 checking for rb_syserr_fail_str(0, Qnil)... yes
 checking for rb_interned_str_cstr()... yes
 checking for rb_io_path() in ruby/io.h... yes
@@ -16,16 +16,16 @@ checking for ttyname_r()... yes
 creating Makefile
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/io-console-0.8.1/ext/io/console
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-jf9r7k sitelibdir\=./.gem.20251025-30080-jf9r7k clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-xd9zbe sitelibdir\=./.gem.20251109-51760-xd9zbe clean
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/io-console-0.8.1/ext/io/console
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-jf9r7k sitelibdir\=./.gem.20251025-30080-jf9r7k
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-xd9zbe sitelibdir\=./.gem.20251109-51760-xd9zbe
 compiling console.c
 linking shared-object io/console.bundle
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/io-console-0.8.1/ext/io/console
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-jf9r7k sitelibdir\=./.gem.20251025-30080-jf9r7k install
-/opt/homebrew/opt/coreutils/libexec/gnubin/install -c -m 0755 console.bundle ./.gem.20251025-30080-jf9r7k/io
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-xd9zbe sitelibdir\=./.gem.20251109-51760-xd9zbe install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 console.bundle ./.gem.20251109-51760-xd9zbe/io
 
 current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/io-console-0.8.1/ext/io/console
-make DESTDIR\= sitearchdir\=./.gem.20251025-30080-jf9r7k sitelibdir\=./.gem.20251025-30080-jf9r7k clean
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-xd9zbe sitelibdir\=./.gem.20251109-51760-xd9zbe clean

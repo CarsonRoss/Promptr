@@ -34,11 +34,12 @@ function authHeaders(): HeadersInit {
   }
 }
 
-export async function scorePrompt(prompt: string, signal?: AbortSignal): Promise<ScoreResponse> {
+export async function scorePrompt(prompt: string, signal?: AbortSignal, progressToken?: string): Promise<ScoreResponse> {
   const res = await fetch(`${BASE_URL}/api/v1/score`, {
     method: 'POST',
     headers: authHeaders(),
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, progress_token: progressToken }),
+    credentials: 'include',
     signal,
   })
   if (res.status === 402) {
@@ -46,6 +47,18 @@ export async function scorePrompt(prompt: string, signal?: AbortSignal): Promise
     return Promise.reject({ status: 402, body })
   }
   if (!res.ok) throw new Error(`Score failed: ${res.status}`)
+  return res.json()
+}
+
+export async function getScoreProgress(token: string, signal?: AbortSignal): Promise<{ step: string | null; at?: string }> {
+  const url = `${BASE_URL}/api/v1/score/progress?token=${encodeURIComponent(token)}`
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: authHeaders(),
+    credentials: 'include',
+    signal,
+  })
+  if (!res.ok) throw new Error(`Progress failed: ${res.status}`)
   return res.json()
 }
 

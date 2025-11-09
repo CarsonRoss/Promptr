@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       get 'health', to: 'health#index'
       resources :score, only: :create
+      get  'score/progress', to: 'score#progress'
       post 'payments/checkout', to: 'payments#checkout'
       post 'payments/confirm', to: 'payments#confirm'
       post 'create-checkout-session', to: 'payments#checkout'

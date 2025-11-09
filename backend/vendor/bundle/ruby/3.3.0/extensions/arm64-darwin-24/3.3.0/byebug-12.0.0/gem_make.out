@@ -1,0 +1,22 @@
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/byebug-12.0.0/ext/byebug
+/Users/carsonross/.rvm/rubies/ruby-3.3.5/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/byebug-12.0.0/ext/byebug
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-j5zan2 sitelibdir\=./.gem.20251109-51760-j5zan2 clean
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/byebug-12.0.0/ext/byebug
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-j5zan2 sitelibdir\=./.gem.20251109-51760-j5zan2
+compiling breakpoint.c
+compiling byebug.c
+compiling context.c
+compiling locker.c
+compiling threads.c
+linking shared-object byebug/byebug.bundle
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/byebug-12.0.0/ext/byebug
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-j5zan2 sitelibdir\=./.gem.20251109-51760-j5zan2 install
+/opt/homebrew/opt/coreutils/bin/ginstall -c -m 0755 byebug.bundle ./.gem.20251109-51760-j5zan2/byebug
+
+current directory: /Users/carsonross/Desktop/Contexto/backend/vendor/bundle/ruby/3.3.0/gems/byebug-12.0.0/ext/byebug
+make DESTDIR\= sitearchdir\=./.gem.20251109-51760-j5zan2 sitelibdir\=./.gem.20251109-51760-j5zan2 clean
