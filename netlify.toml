@@ -3,6 +3,14 @@
   command = "npm ci && npm run build"
   publish = "dist"
 
+# Force HTTPS + www
+[[redirects]]
+  from = "http://promptexto.com/*"
+  to = "https://www.promptexto.com/:splat"
+  status = 301
+  force = true
+
+# SPA fallback (safe to keep even with hash routing)
 [[redirects]]
   from = "/*"
   to = "/index.html"
