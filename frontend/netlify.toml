@@ -1,10 +1,10 @@
-# netlify.toml at repo root
+# netlify.toml (at repo root)
 [build]
-  base = "frontend"          # where package.json & index.html live
+  base = "frontend"
   command = "npm ci && npm run build"
-  publish = "dist"           # Vite output dir
+  publish = "dist"
 
-# SPA fallback (safe even though you use hash routing)
+# SPA fallback (keeps client-side routing working)
 [[redirects]]
   from = "/*"
   to = "/index.html"
