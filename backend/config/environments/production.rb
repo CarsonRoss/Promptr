@@ -49,7 +49,7 @@ Rails.application.configure do
       }
     }
   else
-    config.cache_store = :solid_cache_store
+    config.cache_store = :memory_store
   end
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
