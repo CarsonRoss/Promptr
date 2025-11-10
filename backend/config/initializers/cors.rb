@@ -7,7 +7,9 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins ENV.fetch('VUE_APP_ORIGIN', 'http://localhost:5173')
+    # Allow multiple origins separated by comma, fallback to localhost
+    raw = ENV.fetch('CORS_ORIGINS', ENV.fetch('VUE_APP_ORIGIN', 'http://localhost:5173'))
+    origins(*raw.split(/\s*,\s*/))
 
     resource '*',
       headers: :any,
