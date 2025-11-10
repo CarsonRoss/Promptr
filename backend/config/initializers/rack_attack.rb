@@ -1,11 +1,12 @@
 require 'redis'
 class Rack::Attack
+  # Use Rails.cache so Rack::Attack goes through ActiveSupport::Cache::RedisCacheStore in prod,
+  # and memory in other envs per your production.rb/development.rb configs.
   Rack::Attack.cache.store = Rails.cache
-  # Configure cache store for throttling counters
+
+  # In tests, force an in-memory store to avoid external dependencies.
   if Rails.env.test?
     Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
-  elsif ENV['REDIS_URL']
-    Rack::Attack.cache.store = Rack::Attack::StoreProxy::RedisStoreProxy.new(Redis.new(url: ENV['REDIS_URL']))
   end
 
   # Throttle requests to 60 rpm per IP for API endpoints
@@ -20,5 +21,3 @@ class Rack::Attack
     end
   end
 end
-
-
