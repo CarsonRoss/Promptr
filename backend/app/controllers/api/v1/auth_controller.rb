@@ -99,6 +99,9 @@ module Api
       # GET /api/v1/auth/session
       # Returns { authenticated: boolean, user?: {...} }
       def session
+        # Disable caching so clients never get 304 and stale auth state
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
         user = current_user_from_cookie
         if user
           # Adjust reported status based on user access window (after cancellation)

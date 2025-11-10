@@ -1,4 +1,3 @@
-require 'redis'
 class Rack::Attack
   # Use Rails.cache so Rack::Attack goes through ActiveSupport::Cache::RedisCacheStore in prod,
   # and memory in other envs per your production.rb/development.rb configs.
