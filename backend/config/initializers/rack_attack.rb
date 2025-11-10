@@ -1,5 +1,6 @@
 require 'redis'
 class Rack::Attack
+  Rack::Attack.cache.store = Rails.cache
   # Configure cache store for throttling counters
   if Rails.env.test?
     Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new

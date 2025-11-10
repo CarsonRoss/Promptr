@@ -45,7 +45,7 @@ gem "thruster", require: false
 gem "rack-cors"
 
 # Basic request throttling
-gem "rack-attack"
+gem "rack-attack", ">= 6.8"
 
 # Stripe payments
 gem "stripe"
