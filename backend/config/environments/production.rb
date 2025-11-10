@@ -44,6 +44,7 @@ Rails.application.configure do
   if ENV['REDIS_URL']
     config.cache_store = :redis_cache_store, {
       url: ENV['REDIS_URL'],
+      ssl_params: { verify_mode: OpenSSL::SSL::VERIFY_NONE }, # temporary workaround
       error_handler: -> (method:, returning:, exception:) {
         Rails.logger.warn("Redis cache error: #{exception.class}: #{exception.message}")
       }
