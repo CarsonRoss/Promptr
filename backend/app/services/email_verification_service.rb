@@ -88,8 +88,7 @@ class EmailVerificationService
         text    = "Your verification code is: #{code}"
       
         # Use a public https URL for your logo
-        logo_url = ENV['EMAIL_LOGO_URL'].presence ||
-                   "#{ENV['ASSET_HOST']}/images/logo-transparent.png"
+        logo_url = "https://promptexto.com/images/favicon.png"
       
         html = <<~HTML
           <div style="text-align: center; font-family: Arial, sans-serif; color: #333;">

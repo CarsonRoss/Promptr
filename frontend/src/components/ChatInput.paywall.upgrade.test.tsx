@@ -10,6 +10,10 @@ vi.mock('../lib/api', async () => {
     getSubscriptionStatus: vi.fn().mockResolvedValue({ active: false, current_period_end: '', cancel_at_period_end: false }),
     createCheckout: vi.fn().mockResolvedValue({ url: 'https://checkout.stripe.com/test' }),
     cancelSubscription: vi.fn(),
+    signup: vi.fn().mockResolvedValue({}),
+    login: vi.fn().mockResolvedValue({}),
+    verifyEmailWithCode: vi.fn().mockResolvedValue({}),
+    resendVerification: vi.fn().mockResolvedValue({}),
   }
 })
 
@@ -18,34 +22,37 @@ import * as api from '../lib/api'
 
 describe('Paywall upgrade flow (unauthenticated -> signup -> checkout)', () => {
   beforeEach(() => {
-    vi.useFakeTimers()
+    vi.useRealTimers()
     vi.spyOn(window.history, 'replaceState').mockImplementation(() => {})
   })
 
-  it('opens signup modal on Upgrade when unauthenticated, then proceeds to checkout after verification (onClose)', async () => {
-    // Cause paywall to appear by making scoring return 402
-    ;(api.scorePrompt as any).mockRejectedValueOnce({ status: 402, body: { remaining_uses: 0 } })
-
+  it('opens signup modal on Upgrade, completes signup flow, then proceeds to checkout', async () => {
     render(<ChatInput />)
-    // Type a message to enable send
-    const textarea = await screen.findByPlaceholderText(/Type Anything/i)
-    fireEvent.change(textarea, { target: { value: 'hello' } })
-    const sendBtn = screen.getByRole('button', { name: /send/i })
-    fireEvent.click(sendBtn)
-
-    // Paywall upgrade button should appear
-    const upgradeBtn = await screen.findByRole('button', { name: /upgrade/i })
+    // Click the global Upgrade Now button (top-center)
+    const upgradeBtn = await screen.findByRole('button', { name: /upgrade now/i })
     fireEvent.click(upgradeBtn)
 
-    // Signup modal should be visible
-    await screen.findByText(/Sign Up/i)
+    // Step 1: Email (modal heading)
+    await screen.findByRole('heading', { name: /sign up/i })
+    const emailInput = screen.getByPlaceholderText(/email address/i)
+    fireEvent.change(emailInput, { target: { value: 'x@y.com' } })
+    const nextBtn1 = screen.getByRole('button', { name: /next/i })
+    fireEvent.click(nextBtn1)
 
-    // Simulate successful verification: when modal closes, session becomes authenticated
-    ;(api.getSession as any).mockResolvedValueOnce({ authenticated: true, user: { id: 1, email: 'x@y.com', status: 'paid' } })
+    // Step 2: Password
+    const pwdInput = await screen.findByPlaceholderText(/^password$/i)
+    const confirmInput = screen.getByPlaceholderText(/confirm password/i)
+    fireEvent.change(pwdInput, { target: { value: 'password123' } })
+    fireEvent.change(confirmInput, { target: { value: 'password123' } })
+    const nextBtn2 = screen.getByRole('button', { name: /next/i })
+    fireEvent.click(nextBtn2)
 
-    // Click Cancel to trigger onClose() which runs the pendingUpgrade flow
-    const cancelBtn = screen.getByRole('button', { name: /cancel/i })
-    fireEvent.click(cancelBtn)
+    // Step 3: Code
+    const codeInput = await screen.findByPlaceholderText(/______/)
+    fireEvent.change(codeInput, { target: { value: '123456' } })
+    ;(api.getSession as any).mockResolvedValue({ authenticated: true, user: { id: 1, email: 'x@y.com', status: 'trial' } })
+    const verifyBtn = screen.getByRole('button', { name: /verify/i })
+    fireEvent.click(verifyBtn)
 
     await waitFor(() => {
       expect(api.createCheckout).toHaveBeenCalled()

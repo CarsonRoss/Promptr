@@ -3,5 +3,5 @@ import ChatInput from './components/ReactChatInput'
 
 it('renders chat input with placeholder', () => {
   render(<ChatInput />)
-  expect(screen.getByPlaceholderText(/message\.{3}/i)).toBeInTheDocument()
+  expect(screen.getByPlaceholderText(/enter a prompt/i)).toBeInTheDocument()
 })

@@ -46,10 +46,18 @@ export default function ManageSubscription() {
         ]);
         if (mounted) {
           setUserEmail(sess.user?.email || '');
-          setRenewalIso(status.current_period_end);
-          setRenewalDate(new Date(status.current_period_end).toLocaleDateString());
+  
+          const active = !!status.active;
+          setIsActive(active);
           setIsCancelled(!!status.cancel_at_period_end);
-          setIsActive(!!status.active);
+  
+          if (active && status.current_period_end) {
+            setRenewalIso(status.current_period_end);
+            setRenewalDate(new Date(status.current_period_end).toLocaleDateString());
+          } else {
+            setRenewalIso('');
+            setRenewalDate('Not Subscribed');
+          }
         }
       } catch (e) {
         if (mounted) setError('Failed to load subscription details');
@@ -58,7 +66,7 @@ export default function ManageSubscription() {
         if (mounted) setLoading(false);
       }
     })();
-
+  
     return () => { mounted = false; };
   }, []);
 
