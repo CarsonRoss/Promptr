@@ -30,30 +30,60 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-slate-200 p-5">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-slate-200 p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3 className="text-slate-900 text-lg font-semibold mb-2">Sign in</h3>
+
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              handleLogin() // 👈 same as clicking the button
+            }
+          }}
           className="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Email Address"
         />
+
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              handleLogin()
+            }
+          }}
           className="w-full mt-3 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Password"
         />
+
         {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
+
         <button
           onClick={handleLogin}
           className="w-full mt-4 h-10 rounded-full btn-primary disabled:opacity-60"
           disabled={loading}
-        >Sign in</button>
-        <button onClick={onClose} className="mt-2 w-full text-sm text-slate-600 hover:underline">Cancel</button>
+        >
+          Sign in
+        </button>
+
+        <button
+          onClick={onClose}
+          className="mt-2 w-full text-sm text-slate-600 hover:underline"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   )

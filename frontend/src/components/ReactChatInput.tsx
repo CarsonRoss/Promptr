@@ -675,6 +675,14 @@ function AppFooter() {
         >
           Contact Us
         </a>
+
+        <a
+          className="font-medium"
+          style={{ color: '#ffffff' }}
+          href="mailto:promptexto@gmail.com"
+        >
+          Report a Bug
+        </a>
       </div>
     </div>
   )

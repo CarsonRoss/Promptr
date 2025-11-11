@@ -91,8 +91,14 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-slate-200 p-5">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-slate-200 p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
         {step === 'email' && (
           <div>
             <h3 className="text-slate-900 text-lg font-semibold mb-2">Sign Up</h3>
@@ -100,16 +106,29 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleEmailNext();
+                }
+              }}
               className="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Email Address"
             />
             {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
             <button
               onClick={handleEmailNext}
-              className="w-full mt-4 h-10 rounded-full btn-primary disabled:opacity-60 "
+              className="w-full mt-4 h-10 rounded-full btn-primary disabled:opacity-60"
               disabled={loading}
-            >Next</button>
-            <button onClick={onClose} className="mt-2 w-full text-sm text-slate-600 hover:underline">Cancel</button>
+            >
+              Next
+            </button>
+            <button
+              onClick={onClose}
+              className="mt-2 w-full text-sm text-slate-600 hover:underline"
+            >
+              Cancel
+            </button>
           </div>
         )}
 
@@ -121,6 +140,12 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handlePasswordNext();
+                }
+              }}
               className="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
               placeholder="Password"
             />
@@ -128,6 +153,12 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handlePasswordNext();
+                }
+              }}
               className="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Confirm password"
             />
@@ -136,21 +167,42 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
               onClick={handlePasswordNext}
               className="w-full mt-4 h-10 rounded-full btn-primary disabled:opacity-60"
               disabled={loading}
-            >Next</button>
-            <button onClick={() => setStep('email')} className="mt-2 w-full text-sm text-slate-600 hover:underline">Back</button>
+            >
+              Next
+            </button>
+            <button
+              onClick={() => setStep('email')}
+              className="mt-2 w-full text-sm text-slate-600 hover:underline"
+            >
+              Back
+            </button>
           </div>
         )}
 
         {step === 'code' && (
           <div>
-            <h3 className="text-slate-900 text-lg font-semibold mb-2">Enter verification code</h3>
-            <div className="text-xs text-slate-500 mb-3">We sent a 6‑digit code to {email}</div>
-            <label className="block text-sm text-slate-600 mb-1">6‑digit code</label>
+            <h3 className="text-slate-900 text-lg font-semibold mb-2">
+              Enter verification code
+            </h3>
+            <div className="text-xs text-slate-500 mb-3">
+              We sent a 6-digit code to {email}
+              <br />
+              It may go to your spam folder.
+            </div>
+            <label className="block text-sm text-slate-600 mb-1">6-digit code</label>
             <input
               inputMode="numeric"
               pattern="[0-9]*"
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0,6))}
+              onChange={(e) =>
+                setCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+              }
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleVerify();
+                }
+              }}
               className="tracking-widest text-center w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="______"
             />
@@ -159,9 +211,22 @@ export default function AuthModal({ open, onClose }: { open: boolean; onClose: (
               onClick={handleVerify}
               className="w-full mt-4 h-10 rounded-full btn-primary disabled:opacity-60"
               disabled={loading}
-            >Verify</button>
-            <button onClick={handleResend} className="mt-2 w-full text-sm text-blue-600 hover:underline disabled:opacity-60" disabled={loading}>Resend code</button>
-            <button onClick={() => setStep('password')} className="mt-1 w-full text-sm text-slate-600 hover:underline">Back</button>
+            >
+              Verify
+            </button>
+            <button
+              onClick={handleResend}
+              className="mt-2 w-full text-sm text-blue-600 hover:underline disabled:opacity-60"
+              disabled={loading}
+            >
+              Resend code
+            </button>
+            <button
+              onClick={() => setStep('password')}
+              className="mt-1 w-full text-sm text-slate-600 hover:underline"
+            >
+              Back
+            </button>
           </div>
         )}
       </div>
