@@ -28,7 +28,7 @@ class EmailVerificationService
       text = "Your verification code is: #{code}\n\nOr verify by clicking: #{verification_link}"
       # Prefer a fully-qualified public URL for the logo (email clients cannot read local paths)
       asset_host = ENV['ASSET_HOST'].to_s.presence || ENV['FRONTEND_URL'].to_s.presence
-      logo_url   = ENV['EMAIL_LOGO_URL'].to_s.presence || (asset_host ? "#{asset_host}/images/logo-transparent.png" : nil)
+      logo_url   = public_logo_url
       html = <<~HTML
           <div style="text-align: center;">
             #{logo_url ? "<img src=\"#{logo_url}\" alt=\"Promptexto Logo\" style=\"width: 120px; margin-bottom: 20px;\" />" : ""}
@@ -88,7 +88,7 @@ class EmailVerificationService
       text    = "Your verification code is: #{code}"
     
       # Use a public https URL for your logo
-      logo_url = "https://www.promptexto.com/favicon.png"
+      logo_url = public_logo_url
     
       html = <<~HTML
         <div style="text-align: center; font-family: Arial, sans-serif; color: #333;">
@@ -123,5 +123,9 @@ class EmailVerificationService
     rescue => e
       Rails.logger.error("[EmailVerificationService] send_code_to_email error: #{e.class} #{e.message}")
       false
+  end
+
+  def self.public_logo_url
+    "https://www.promptexto.com/favicon.png"
   end
 end
