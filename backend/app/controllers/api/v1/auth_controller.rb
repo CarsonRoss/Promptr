@@ -23,10 +23,10 @@ module Api
       def signup
         email = params[:email].to_s.downcase.strip
         password = params[:password].to_s
-        password_confirmation = params[:password_confirmation].presence || password
+        password_confirmation = params[:password_confirmation].to_s
 
         # Do not persist user yet; issue verification code to email
-        if email.blank? || password.length < 8 || password != password_confirmation
+        if email.blank? || password.length < 8 || password_confirmation.blank? || password != password_confirmation
           return render json: { error: 'validation_failed' }, status: :unprocessable_entity
         end
         ok = EmailVerificationService.send_code_to_email(email)
@@ -50,13 +50,24 @@ module Api
           end
           # Create the user now that code is verified
           pwd = params[:password].to_s
-          pwdc = params[:password_confirmation].presence || pwd
+          pwdc = params[:password_confirmation].to_s
 
           return render json: { error: 'password_blank' }, status: :unprocessable_entity if pwd.blank?
           return render json: { error: 'password_too_short' }, status: :unprocessable_entity if pwd.length < 8
-          return render json: { error: 'password_confirmation_mismatch' }, status: :unprocessable_entity if pwd != pwdc
+          return render json: { error: 'password_confirmation_mismatch' }, status: :unprocessable_entity if pwdc.blank? || pwd != pwdc
 
           user = User.create!(email: email, password: pwd, password_confirmation: pwdc, status: 'unpaid')
+          # If a device is present in headers, inherit remaining uses from that device
+          begin
+            dev_id = request.headers['X-Device-Id'].to_s.presence
+            if dev_id
+              if (dev = Device.find_by(device_id: dev_id))
+                user.update!(remaining_uses: [dev.remaining_uses.to_i, 10].min)
+              end
+            end
+          rescue => e
+            Rails.logger.warn("[Auth#verify_email] failed to copy device remaining uses: #{e.class} #{e.message}")
+          end
           user.verify_email_timestamp!
           Rails.cache.delete(cache_key_email)
           # Auto sign-in: issue JWT cookie

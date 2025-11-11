@@ -8,9 +8,15 @@ module Api
       
         user = current_user_from_cookie
         paid = user&.status == 'paid' # unify with status endpoint (user-based)
-        # Enforce paywall for unpaid users strictly by remaining_uses to avoid device-level paid? mismatches
-        if !paid && @device.remaining_uses <= 0
-          return render json: { paywall: true, remaining_uses: @device.remaining_uses }, status: :payment_required
+        # Choose the governing remaining uses: user (if present & unpaid), else device
+        governing_remaining = if user && !paid
+          user.remaining_uses_value
+        else
+          @device.remaining_uses
+        end
+        # Enforce paywall for unpaid users strictly by governing remaining uses
+        if !paid && governing_remaining <= 0
+          return render json: { paywall: true, remaining_uses: governing_remaining }, status: :payment_required
         end
       
         normalized = prompt.strip
@@ -20,7 +26,13 @@ module Api
       
         if last_prompt.present? && last_prompt == normalized
           if (cached = Rails.cache.read(cache_key_result)).present?
-            @device.consume_trial!(force: true) unless paid
+            unless paid
+              if user
+                user.consume_trial!
+              else
+                @device.consume_trial!(force: true)
+              end
+            end
             return render json: cached
           end
         end
@@ -28,7 +40,13 @@ module Api
         progress_token = params[:progress_token].to_s.presence
         result = PromptScoringService.call(prompt, progress_token: progress_token)
       
-        @device.consume_trial!(force: true) unless paid
+        unless paid
+          if user
+            user.consume_trial!
+          else
+            @device.consume_trial!(force: true)
+          end
+        end
       
         Rails.cache.write(cache_key_prompt, normalized, expires_in: 10.minutes)
         Rails.cache.write(cache_key_result, result, expires_in: 10.minutes)

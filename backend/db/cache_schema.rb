@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_25_151707) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_11_224832) do
   create_table "devices", force: :cascade do |t|
     t.string "device_id", null: false
     t.datetime "last_seen_at"
@@ -52,6 +52,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_151707) do
     t.string "status", default: "unpaid", null: false
     t.datetime "verified_at"
     t.datetime "last_login_at"
+    t.integer "remaining_uses", default: 10
     t.index ["email"], name: "index_users_tables_on_email", unique: true
   end
 

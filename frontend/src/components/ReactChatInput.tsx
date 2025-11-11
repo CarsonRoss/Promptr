@@ -407,7 +407,11 @@ export default function ChatInput() {
 
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-start justify-center p-6 relative">
-      {/* Top-right auth buttons or user icon */}
+      <img
+        src="/favicon.png"
+        alt="Promptexto"
+        className="absolute top-4 left-4 rounded w-24 h-auto"
+      />
       <div className="absolute top-2 right-2 z-40">
         {!isAuthenticated ? (
           <div className="flex gap-2">

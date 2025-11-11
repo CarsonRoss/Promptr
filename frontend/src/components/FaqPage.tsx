@@ -3,9 +3,14 @@ import React from 'react'
 export default function FaqPage() {
   return (
     <div className="min-h-screen w-screen bg-gray-50 relative">
+      <img
+        src="/favicon.png"
+        alt="Promptexto"
+        className="absolute top-4 left-4 rounded w-24 h-auto"
+      />
       <button
         onClick={() => { window.location.hash = '#/' }}
-        className="absolute top-4 left-4 text-sm text-gray-700"
+        className="absolute top-4 right-4 text-sm text-gray-700"
       >
         ← Home
       </button>
@@ -56,22 +61,31 @@ export default function FaqPage() {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-blue-600 text-white">
-        <div className="max-w-5xl mx-auto py-3 flex items-center justify-center gap-10">
-          <button
-            className="font-medium hover:underline"
-            onClick={() => { window.location.hash = '#/faq' }}
-          >
-            FAQ
-          </button>
-          <a
-            className="font-medium"
-            style={{ color: '#ffffff' }}
-            href="mailto:promptexto@gmail.com"
-          >
-            Contact Us
-          </a>
-        </div>
+      <div className="max-w-5xl mx-auto py-3 flex items-center justify-center gap-10">
+        <button
+          className="font-medium"
+          style={{ color: '#ffffff' }}
+          onClick={() => { window.location.hash = '#/faq' }}
+        >
+          FAQ
+        </button>
+        <a
+          className="font-medium"
+          style={{ color: '#ffffff' }}
+          href="mailto:promptexto@gmail.com"
+        >
+          Contact Us
+        </a>
+
+        <a
+          className="font-medium"
+          style={{ color: '#ffffff' }}
+          href="mailto:promptexto@gmail.com"
+        >
+          Report a Bug
+        </a>
       </div>
+    </div>
     </div>
   )
 }
