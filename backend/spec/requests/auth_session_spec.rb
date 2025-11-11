@@ -18,6 +18,28 @@ RSpec.describe "Auth session flow", type: :request do
     expect(body["user"]).to be_present
     expect(body["user"]["email"]).to eq(user.email)
   end
+
+  it "clears cookie on logout and subsequent session is unauthenticated" do
+    # Log in first to set cookie
+    post "/api/v1/auth/login", params: { email: user.email, password: "password123" }.to_json, headers: { "CONTENT_TYPE" => "application/json" }
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Set-Cookie']).to include('ctx_token=')
+
+    # Verify authenticated
+    get "/api/v1/auth/session"
+    expect(response).to have_http_status(:ok)
+    expect(JSON.parse(response.body)["authenticated"]).to eq(true)
+
+    # Logout should clear cookie (Set-Cookie with deletion)
+    post "/api/v1/auth/logout"
+    expect(response).to have_http_status(:ok)
+    expect(response.headers['Set-Cookie']).to include('ctx_token=') # deletion header present
+
+    # Now session should be unauthenticated with cookie cleared
+    get "/api/v1/auth/session"
+    expect(response).to have_http_status(:ok)
+    expect(JSON.parse(response.body)["authenticated"]).to eq(false)
+  end
 end
 
 

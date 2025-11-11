@@ -15,7 +15,14 @@ class ApplicationController < ActionController::API
   end
 
   def clear_auth_cookie
-    cookies.delete(:ctx_token, path: '/')
+    # Ensure deletion matches the attributes used when setting the cookie.
+    # Some browsers require SameSite/Secure alignment for cross-site cookies to be cleared.
+    cookies.delete(
+      :ctx_token,
+      path: '/',
+      secure: Rails.env.production?,
+      same_site: Rails.env.production? ? :none : :lax
+    )
   end
 
   def current_user_from_cookie
